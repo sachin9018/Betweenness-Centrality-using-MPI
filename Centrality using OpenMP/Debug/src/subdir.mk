@@ -4,18 +4,12 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
-../src/Graph.cpp \
-../src/GraphDeclarations.cpp \
 ../src/main_program.cpp 
 
 OBJS += \
-./src/Graph.o \
-./src/GraphDeclarations.o \
 ./src/main_program.o 
 
 CPP_DEPS += \
-./src/Graph.d \
-./src/GraphDeclarations.d \
 ./src/main_program.d 
 
 
