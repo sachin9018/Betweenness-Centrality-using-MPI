@@ -15,36 +15,38 @@
 #include <vector>
 using namespace std;
 
-//class Graph {
-//public:
-	void edge_add(int src, int dest,vector<int> adj[]) {
-		cout<<src<<":"<<dest;
-		adj[src].push_back(dest);
-		adj[dest].push_back(src);
-//	}
+
+void edge_add(int src, int dest, list<int> adj[]) {
+	cout << src << ":" << dest<<"\n";
+	adj[src].push_back(dest);
+	adj[dest].push_back(src);
+}
+
+void graph_print(list<int> adj[], int V){
+
+	    for (int u = 0; u < V; u++)
+	    {
+	        cout << "Node " << u << " makes an edge with \n";
+	        for (auto it = adj[u].begin(); it!=adj[u].end(); ++it)
+	        {
+	        	cout<<*it <<":";
+	        }
+	        cout<<"\n";
+	        }
+
+}
+
 //};
-
-class GraphDeclarations{
-public:
-
-//    https://stackoverflow.com/questions/17897943/array-of-stdlist-c
-    typedef list<int> L;
-    int size=5;
-//    static vector<int> adj[5];
-};
 
 int main() {
 
-//	Graph g;
-	vector<int> adj[5];
-	edge_add(1, 2,adj);
-	edge_add(2, 3,adj);
-	edge_add(3, 4,adj);
-	edge_add(4, 1,adj);
+	int V = 5;
+	list<int> adj[V];
+	edge_add(1, 2, adj);
+	edge_add(2, 3, adj);
+	edge_add(3, 4, adj);
+	edge_add(4, 1, adj);
+	graph_print(adj, V);
 
-	for(int i=1;i<6;i++) {
-		for (auto it = adj[i].begin(); it!=adj[i].end(); it++)
-			cout<<*it;
-	}
 	return 0;
 }
