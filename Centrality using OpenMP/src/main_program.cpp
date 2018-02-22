@@ -14,8 +14,19 @@
 #include <iterator>
 #include <vector>
 #include <stack>
+#include <map>
+#include <set>
+#include <string>
 using namespace std;
 
+//Mehtod for checking if the neighbor is already present
+//bool check_neigh_present(map<int, list<int> > map, int source){
+//		vector<int> tmp_list = map.get(source);
+//		list <int> :: iterator it;
+//	    for(it = g.begin(); it != g.end(); ++it)
+//	        cout << '\t' << *it;
+//	    cout << '\n';
+//}
 //Method for forming the adjacency list
 void edge_add(int src, int dest, vector<int> adj[]) {
 	cout << src << ":" << dest << "\n";
@@ -37,30 +48,31 @@ void graph_print(vector<int> adj[], int V) {
 }
 
 //Method for initializing the arrays and variables for each source vertex
-void initialize(int V, int source_vertex, vector<int> predecessor[], int *sigma, int *distance, float *delta){
-	predecessor = new vector<int>[V];
-	sigma       = new int[V];
-	distance    = new int[V];
-	delta       = new int[V];
+void initialize(int V, int source_vertex, vector<int> predecessor[], int *sigma,int *distance, float *delta) {
+	predecessor = new vector<int> [V];
+	sigma = new int[V];
+	distance = new int[V];
+	delta = new float[V];
 
-	for(int i=0;i<V;i++){
-		predecessor[i] = new vector<int>[V];
-		sigma[i]       = 0;
-		distance[i]    = -1;
-		delta[i]       = 0;
+	for (int i = 0; i < V; i++) {
+//		predecessor[i] = new vector<int>[];
+		sigma[i] = 0;
+		distance[i] = -1;
+		delta[i] = 0;
 	}
 
 	distance[source_vertex] = 0;
-	sigma[source_vertex]    = 1;
+	sigma[source_vertex] = 1;
 }
 
 //Method for calculating the Betweenness Centrality
-void calculate_centrality(int V,vector<int> adj[],vector<int> predecessor[],int *sigma, int *distance,float *delta, stack<int> st) {
+void calculate_centrality(int V, vector<int> adj[], vector<int> predecessor[],int *sigma, int *distance, float *delta, stack<int> st,map<int, vector<int> > map) {
 
 //	iterating through each vertex
-	for(int i=1;i<=V;i++){
+	for (int i = 1; i <= V; i++) {
 		int source_vertex = i;
-		initialize(V,source_vertex,predecessor, sigma,distance,delta);
+		initialize(V, source_vertex, predecessor, sigma, distance, delta);
+
 	}
 }
 
@@ -74,7 +86,10 @@ int main() {
 	int *distance = new int[V];
 	float *delta = new float[V];
 	stack<int> st;
+	map <int, vector<int> > map;
+//	 typedef map<string,list<int> > maptype;
 
+//	    std::map<int, std::set<int> > mymap;
 
 //	Adding to the adjacency list
 	edge_add(1, 2, adj);
@@ -83,7 +98,7 @@ int main() {
 	edge_add(4, 1, adj);
 
 //	calculating the centrality
-	calculate_centrality(5, adj,predecessor, sigma,distance,delta,st);
+	calculate_centrality(5, adj, predecessor, sigma, distance, delta, st,map);
 
 //	Printing the graph
 	graph_print(adj, V);
