@@ -46,41 +46,41 @@ void graph_print(vector<int> adj[], int V) {
 }
 
 //Method for initializing the arrays and variables for each source vertex
-void initialize(int V, int source_vertex, vector<int> predecessor[], int *sigma,
-		int *distance, float *delta) {
+void initialize(int V, int source_vertex, vector<int> predecessor[], vector<int> vector_sigma,
+		vector<int> vector_distance, vector<float> vector_delta) {
 	predecessor = new vector<int> [V];
-	sigma = new int[V];
-	distance = new int[V];
-	delta = new float[V];
+	vector_sigma.clear();
+	vector_distance.clear();
+	vector_delta.clear();
 
 	for (int i = 0; i < V; i++) {
 //		predecessor[i] = new vector<int>[];
-		sigma[i] = 0;
-		distance[i] = -1;
-		delta[i] = 0;
+		vector_sigma[i] = 0;
+		vector_distance[i] = -1;
+		vector_delta[i] = 0;
 	}
 
-	distance[source_vertex] = 0;
-	sigma[source_vertex] = 1;
+	vector_distance[source_vertex] = 0;
+	vector_sigma[source_vertex] = 1;
 }
 
-void print_BC(float* BC, int V,string file_name) {
+void print_BC(vector<float> BC, int V, string file_name) {
 	cout << "\nBetweenness Centrality \n";
 	ofstream myfile(file_name);
 	if (myfile.is_open()) {
-		for (int i = 1; i <= V; i++){
+		for (int i = 1; i <= V; i++) {
 			cout << "Vertex  : " << i << " : " << BC[i] << "\n";
-			 myfile << i<<" : ";
-			 myfile <<BC[i]<<"\n";
+			myfile << i << " : ";
+			myfile << BC[i] << "\n";
 		}
 	} else
 		cout << "Unable to open file";
 }
 
 //Method for calculating the Betweenness Centrality
-void calculate_centrality(int V, vector<int> adj[], vector<int> predecessor[],
-		int *sigma, int *distance, float *delta, stack<int> st,
-		map<int, vector<int> > map, queue<int> q, float* CB,
+vector<float> calculate_centrality(int V, vector<int> adj[], vector<int> predecessor[],
+		vector<int> sigma, vector<int> distance, vector<float> delta, stack<int> st,
+		map<int, vector<int> > map, queue<int> q, vector<float> CB,
 		int** shortest_path_dist) {
 
 //	cout << "went in calculate centrality";
@@ -91,9 +91,13 @@ void calculate_centrality(int V, vector<int> adj[], vector<int> predecessor[],
 
 //		Begin of Initialization
 		predecessor = new vector<int> [V];
-		sigma = new int[V];
-		distance = new int[V];
-		delta = new float[V];
+//		sigma = new int[V];
+//		distance = new int[V];
+//		delta = new float[V];
+		sigma.clear();
+		delta.clear();
+		distance.clear();
+
 
 		for (int i = 0; i < V; i++) {
 			sigma[i] = 0;
@@ -167,6 +171,8 @@ void calculate_centrality(int V, vector<int> adj[], vector<int> predecessor[],
 //        shortest_path_dist[src] = distance;
 
 	}
+
+	return CB;
 }
 
 //	  Reference - split functionality
@@ -180,14 +186,14 @@ void split(const string &s, char delim, vector<int> adj[]) {
 		if (item.find(",") != string::npos) {
 			stringstream ss(item);
 			while (getline(ss, item, ',')) {
-				cout << main_tmp << " : " << item << endl;
+//				cout << main_tmp << " : " << item << endl;
 
 				edge_add(stoi(main_tmp), stoi(item), adj);
 			}
 			count = 0;
 		} else if (count == 1) {
 			count = 1;
-			cout << main_tmp << " : " << item << endl;
+//			cout << main_tmp << " : " << item << endl;
 		}
 		main_tmp = item;
 		count++;
@@ -224,6 +230,10 @@ int main() {
 	int V = 101;
 	vector<int> adj[V];
 	vector<int> predecessor[V];
+	vector<int> vector_sigma(V);
+	vector<int> vector_distance(V);
+	vector<float> vector_delta(V);
+	vector<float> vector_BC(V);
 	int *sigma = new int[V];
 	int *distance = new int[V];
 	float *delta = new float[V];
@@ -232,43 +242,24 @@ int main() {
 	map<int, vector<int> > map;
 	queue<int> q;
 	int **shortest_path_dist = new int*[V];
-	string input_filename = "/Users/balaji/Documents/Github_New/HPC/file_100.txt";
+	string input_filename =
+			"/Users/balaji/Documents/Github_New/HPC/file_100.txt";
 	string output_filename = "/Users/balaji/Documents/Github_New/HPC/BC_100";
 	for (int i = 0; i < V; ++i) {
 		shortest_path_dist[i] = new int[V];
 	}
 
 	for (int i = 0; i < V; ++i) {
-		BC[i] = 0.0;
+		vector_BC.push_back(0);
 	}
 
 	cout << "before going in edge add\n";
-//Readign from the file
+//	Reading from the file
 	read_file(input_filename, adj);
-//	Adding to the adjacency list
-//	edge_add(1, 2, adj);
-//	//edge_add(1, 2, adj);
-//	edge_add(1, 3, adj);
-//	edge_add(1, 4, adj);
-//	edge_add(2, 3, adj);
-//	edge_add(2, 5, adj);
-//	edge_add(3, 4, adj);
-//	edge_add(3, 5, adj);
-//	edge_add(4, 5, adj);
-//	edge_add(5, 6, adj);
-//	edge_add(5, 7, adj);
-//	edge_add(6, 7, adj);
-	//edge_add(5, 1, adj);
-	//edge_add(5, 3, adj);
-
-//	check_method(V, adj, predecessor, sigma, distance, delta, st, map, q, BC,
-//			shortest_path_dist);
-//	cout << "before going in calculate centrality" << "\n";
-//	print_BC(BC, V);
 
 //	calculating the centrality
-	calculate_centrality(V, adj, predecessor, sigma, distance, delta, st, map,
-			q, BC, shortest_path_dist);
+	vector_BC = calculate_centrality(V, adj, predecessor, vector_sigma, vector_distance, vector_delta, st, map,
+			q, vector_BC, shortest_path_dist);
 
 	cout << "After going in calculate centrality" << "\n";
 //	print_BC(BC, V);
@@ -277,7 +268,7 @@ int main() {
 //	graph_print(adj, V);
 
 //	Print Betweenness Centrality
-	print_BC(BC, V,output_filename);
+	print_BC(vector_BC, V, output_filename);
 
 	return 0;
 }
