@@ -180,14 +180,14 @@ void split(const string &s, char delim, vector<int> adj[]) {
 		if (item.find(",") != string::npos) {
 			stringstream ss(item);
 			while (getline(ss, item, ',')) {
-				cout << main_tmp << " : " << item << endl;
+//				cout << main_tmp << " : " << item << endl;
 
 				edge_add(stoi(main_tmp), stoi(item), adj);
 			}
 			count = 0;
 		} else if (count == 1) {
 			count = 1;
-			cout << main_tmp << " : " << item << endl;
+//			cout << main_tmp << " : " << item << endl;
 		}
 		main_tmp = item;
 		count++;
@@ -224,6 +224,7 @@ int main() {
 	int V = 101;
 	vector<int> adj[V];
 	vector<int> predecessor[V];
+
 	int *sigma = new int[V];
 	int *distance = new int[V];
 	float *delta = new float[V];
@@ -243,28 +244,9 @@ int main() {
 	}
 
 	cout << "before going in edge add\n";
-//Readign from the file
+//	Reading from the file
 	read_file(input_filename, adj);
-//	Adding to the adjacency list
-//	edge_add(1, 2, adj);
-//	//edge_add(1, 2, adj);
-//	edge_add(1, 3, adj);
-//	edge_add(1, 4, adj);
-//	edge_add(2, 3, adj);
-//	edge_add(2, 5, adj);
-//	edge_add(3, 4, adj);
-//	edge_add(3, 5, adj);
-//	edge_add(4, 5, adj);
-//	edge_add(5, 6, adj);
-//	edge_add(5, 7, adj);
-//	edge_add(6, 7, adj);
-	//edge_add(5, 1, adj);
-	//edge_add(5, 3, adj);
 
-//	check_method(V, adj, predecessor, sigma, distance, delta, st, map, q, BC,
-//			shortest_path_dist);
-//	cout << "before going in calculate centrality" << "\n";
-//	print_BC(BC, V);
 
 //	calculating the centrality
 	calculate_centrality(V, adj, predecessor, sigma, distance, delta, st, map,
