@@ -165,16 +165,18 @@ void calculate_centrality(int V, vector<int> adj[], vector<int> predecessor[],
 
 //	  Reference - split functionality
 //	  http://ysonggit.github.io/coding/2014/12/16/split-a-string-using-c.html
-void split(const string &s, char delim) {
+void split(const string &s, char delim, vector<int> adj[]) {
 	stringstream ss(s);
 	string item;
 	string main_tmp="";
-	int count=0;
+	int count=0,src=0,dest;
 	while (getline(ss, item, delim)) {
 		if(item.find(",")!=string::npos){
 			stringstream ss(item);
 			while (getline(ss, item, ',')){
 				cout<<main_tmp<<" : "<<item<<endl;
+
+				edge_add(stoi(main_tmp),stoi(item),adj);
 			}
 			count=0;
 		}else if(count==1){
@@ -188,7 +190,7 @@ void split(const string &s, char delim) {
 }
 
 // Method read file
-void read_file(string path) {
+void read_file(string path,vector<int> adj[]) {
 //	Reference - reading the file
 //	http://www.cplusplus.com/doc/tutorial/files/
 
@@ -203,7 +205,7 @@ void read_file(string path) {
 		while (getline(myfile, line)) {
 			if (line.find("notfound") != string::npos)
 				continue;
-			split(line, ':');
+			split(line, ':',adj);
 		}
 		myfile.close();
 	} else
@@ -213,7 +215,7 @@ void read_file(string path) {
 int main() {
 
 //	Declarations
-	int V = 50;
+	int V = 999983;
 	vector<int> adj[V];
 	vector<int> predecessor[V];
 	int *sigma = new int[V];
@@ -234,7 +236,7 @@ int main() {
 
 	cout << "before going in edge add\n";
 //Readign from the file
-	read_file("/Users/balaji/Documents/Github_New/HPC/file.txt");
+	read_file("/Users/balaji/Documents/Github_New/HPC/file.txt", adj);
 //	Adding to the adjacency list
 	edge_add(1, 2, adj);
 	//edge_add(1, 2, adj);
