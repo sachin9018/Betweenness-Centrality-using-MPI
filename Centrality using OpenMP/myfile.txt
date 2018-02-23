@@ -1,0 +1,1 @@
+Run Time for : 10001 : vertices is : 8.18795e+06Run Time for : 10001 : vertices is : 8.30982e+06

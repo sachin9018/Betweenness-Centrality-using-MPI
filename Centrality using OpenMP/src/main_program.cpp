@@ -69,10 +69,11 @@ void print_BC(vector<float> BC, int V, string file_name) {
 	ofstream myfile(file_name);
 	if (myfile.is_open()) {
 		for (int i = 1; i <= V; i++) {
-			cout << "Vertex  : " << i << " : " << BC[i] << "\n";
+//			cout << "Vertex  : " << i << " : " << BC[i] << "\n";
 			myfile << i << " : ";
 			myfile << BC[i] << "\n";
 		}
+		 myfile.close();
 	} else
 		cout << "Unable to open file";
 }
@@ -227,7 +228,7 @@ void read_file(string path, vector<int> adj[]) {
 int main() {
 
 //	Declarations
-	int V = 101;
+	int V = 10001;
 	vector<int> adj[V];
 	vector<int> predecessor[V];
 	vector<int> vector_sigma(V);
@@ -242,9 +243,12 @@ int main() {
 	map<int, vector<int> > map;
 	queue<int> q;
 	int **shortest_path_dist = new int*[V];
+	ofstream out;
 	string input_filename =
 			"/Users/balaji/Documents/Github_New/HPC/file_100.txt";
-	string output_filename = "/Users/balaji/Documents/Github_New/HPC/BC_100";
+	string output_filename = "/Users/balaji/Documents/Github_New/HPC/BC_100.txt";
+	string runtime_file = "/Users/balaji/Documents/Github_New/HPC/run_time.txt";
+	clock_t t1,t2;
 	for (int i = 0; i < V; ++i) {
 		shortest_path_dist[i] = new int[V];
 	}
@@ -253,15 +257,23 @@ int main() {
 		vector_BC.push_back(0);
 	}
 
-	cout << "before going in edge add\n";
+//	cout << "before going in edge add\n";
 //	Reading from the file
 	read_file(input_filename, adj);
 
+	cout<<"Calculation of Betweenness Centrality Started"<<endl;
+	 t1=clock();
 //	calculating the centrality
 	vector_BC = calculate_centrality(V, adj, predecessor, vector_sigma, vector_distance, vector_delta, st, map,
 			q, vector_BC, shortest_path_dist);
-
-	cout << "After going in calculate centrality" << "\n";
+	 t2=clock();
+	cout<<"Calculation of Betweenness Centrality ended"<<endl;
+	float run_time = ((float)t2-(float)t1);
+	cout<<"Centrality calculated in : %f"<<run_time<<endl;
+	out.open(runtime_file, std::ios::app);
+	out<<"\nRun Time for : "<<V<<" : vertices is : ";
+	out<<run_time;
+	out.close();
 //	print_BC(BC, V);
 
 //	Printing the graph
