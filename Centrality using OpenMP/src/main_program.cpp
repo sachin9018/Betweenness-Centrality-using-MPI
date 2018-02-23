@@ -19,16 +19,12 @@
 #include <string>
 #include <queue>
 #include <algorithm>
+#include <fstream>
+#include <string>
+#include <sstream>
+
 using namespace std;
 
-//Method for checking if the neighbor is already present
-//bool check_neigh_present(map<int, list<int> > map, int source){
-//		vector<int> tmp_list = map.get(source);
-//		list <int> :: iterator it;
-//	    for(it = g.begin(); it != g.end(); ++it)
-//	        cout << '\t' << *it;
-//	    cout << '\n';
-//}
 
 //Method for forming the adjacency list
 void edge_add(int src, int dest, vector<int> adj[]) {
@@ -41,11 +37,11 @@ void edge_add(int src, int dest, vector<int> adj[]) {
 void graph_print(vector<int> adj[], int V) {
 
 	for (int u = 0; u < V; u++) {
-		cout << "Node " << u << " makes an edge with \n";
+//		cout << "Node " << u << " makes an edge with \n";
 		for (auto it = adj[u].begin(); it != adj[u].end(); ++it) {
-			cout << *it << ":";
+//			cout << *it << ":";
 		}
-		cout << "\n";
+//		cout << "\n";
 	}
 
 }
@@ -70,7 +66,7 @@ void initialize(int V, int source_vertex, vector<int> predecessor[], int *sigma,
 }
 
 void print_BC(float* BC, int V) {
-	cout<<"\nBetweenness Centrality \n";
+	cout << "\nBetweenness Centrality \n";
 	for (int i = 1; i <= V; i++)
 		cout << "Vertex  : " << i << " : " << BC[i] << "\n";
 }
@@ -81,7 +77,7 @@ void calculate_centrality(int V, vector<int> adj[], vector<int> predecessor[],
 		map<int, vector<int> > map, queue<int> q, float* CB,
 		int** shortest_path_dist) {
 
-	cout << "went in calculate centrality";
+//	cout << "went in calculate centrality";
 
 //	iterating through each vertex
 	for (int i = 1; i <= V; i++) {
@@ -115,24 +111,25 @@ void calculate_centrality(int V, vector<int> adj[], vector<int> predecessor[],
 			q.pop();
 			st.push(vertex);
 			for (auto &i : adj[vertex]) {
-				cout<<"Vertex : " << vertex <<" neighbor :"<<i<<endl;
+//				cout << "Vertex : " << vertex << " neighbor :" << i << endl;
 				if (distance[i] < 0) {
 					q.push(i);
 					distance[i] = distance[vertex] + 1;
 				}
-				cout<<"distance["<<i<<"]"<<"="<<distance[i]<<"\n";
+//				cout << "distance[" << i << "]" << "=" << distance[i] << "\n";
 				if (distance[i] == distance[vertex] + 1) {
 					sigma[i] = sigma[i] + sigma[vertex];
-					cout<<"sigma["<<i<<"] : "<<sigma[i]<<endl;
+//					cout << "sigma[" << i << "] : " << sigma[i] << endl;
 
 //					https://stackoverflow.com/questions/24139428/check-if-element-is-in-the-list-contains
 					bool found = (std::find(predecessor[i].begin(),
 							predecessor[i].end(), vertex)
 							!= predecessor[i].end());
 
-					if (!found){
+					if (!found) {
 						predecessor[i].push_back(vertex);
-						cout<<"predessor for "<<i<<" is "<<vertex<<endl;
+//						cout << "predessor for " << i << " is " << vertex
+//								<< endl;
 					}
 				}
 			}
@@ -143,9 +140,11 @@ void calculate_centrality(int V, vector<int> adj[], vector<int> predecessor[],
 			int st_neigh = st.top();
 			st.pop();
 			for (auto &vertex_pred : predecessor[st_neigh]) {
-				cout<<"neigh : "<<st_neigh<<" pred : " <<vertex_pred<<endl;
+//				cout << "neigh : " << st_neigh << " pred : " << vertex_pred
+//						<< endl;
 
-				cout<<"before:\n"<<  "delta["<<vertex_pred<<"] : "<<delta[vertex_pred]
+//				cout << "before:\n" << "delta[" << vertex_pred << "] : "
+//						<< delta[vertex_pred];
 				float tmp_delta = delta[vertex_pred]
 						+ (((float) ((float) sigma[vertex_pred]
 								/ (float) sigma[st_neigh]))
@@ -162,6 +161,53 @@ void calculate_centrality(int V, vector<int> adj[], vector<int> predecessor[],
 //        shortest_path_dist[src] = distance;
 
 	}
+}
+
+//	  Reference - split functionality
+//	  http://ysonggit.github.io/coding/2014/12/16/split-a-string-using-c.html
+void split(const string &s, char delim) {
+	stringstream ss(s);
+	string item;
+	string main_tmp="";
+	int count=0;
+	while (getline(ss, item, delim)) {
+		if(item.find(",")!=string::npos){
+			stringstream ss(item);
+			while (getline(ss, item, ',')){
+				cout<<main_tmp<<" : "<<item<<endl;
+			}
+			count=0;
+		}else if(count==1){
+			count=1;
+			cout<<main_tmp<<" : "<<item<<endl;
+		}
+		main_tmp = item;
+		count++;
+
+	}
+}
+
+// Method read file
+void read_file(string path) {
+//	Reference - reading the file
+//	http://www.cplusplus.com/doc/tutorial/files/
+
+	string line;
+	ifstream myfile(path);
+	stringstream ss(line);
+	string item;
+	vector<string> tokens;
+//	  Reference - split functionality
+//	  http://ysonggit.github.io/coding/2014/12/16/split-a-string-using-c.html
+	if (myfile.is_open()) {
+		while (getline(myfile, line)) {
+			if (line.find("notfound") != string::npos)
+				continue;
+			split(line, ':');
+		}
+		myfile.close();
+	} else
+		cout << "Unable to open file";
 }
 
 int main() {
@@ -187,6 +233,8 @@ int main() {
 	}
 
 	cout << "before going in edge add\n";
+//Readign from the file
+	read_file("/Users/balaji/Documents/Github_New/HPC/file.txt");
 //	Adding to the adjacency list
 	edge_add(1, 2, adj);
 	//edge_add(1, 2, adj);
@@ -213,7 +261,7 @@ int main() {
 			q, BC, shortest_path_dist);
 
 	cout << "After going in calculate centrality" << "\n";
-	print_BC(BC, V);
+//	print_BC(BC, V);
 
 //	Printing the graph
 //	graph_print(adj, V);
