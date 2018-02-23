@@ -25,7 +25,6 @@
 
 using namespace std;
 
-
 //Method for forming the adjacency list
 void edge_add(int src, int dest, vector<int> adj[]) {
 //	cout << "Gone " << src << ":" << dest << "\n";
@@ -65,10 +64,17 @@ void initialize(int V, int source_vertex, vector<int> predecessor[], int *sigma,
 	sigma[source_vertex] = 1;
 }
 
-void print_BC(float* BC, int V) {
+void print_BC(float* BC, int V,string file_name) {
 	cout << "\nBetweenness Centrality \n";
-	for (int i = 1; i <= V; i++)
-		cout << "Vertex  : " << i << " : " << BC[i] << "\n";
+	ofstream myfile(file_name);
+	if (myfile.is_open()) {
+		for (int i = 1; i <= V; i++){
+			cout << "Vertex  : " << i << " : " << BC[i] << "\n";
+			 myfile << i<<" : ";
+			 myfile <<BC[i]<<"\n";
+		}
+	} else
+		cout << "Unable to open file";
 }
 
 //Method for calculating the Betweenness Centrality
@@ -168,20 +174,20 @@ void calculate_centrality(int V, vector<int> adj[], vector<int> predecessor[],
 void split(const string &s, char delim, vector<int> adj[]) {
 	stringstream ss(s);
 	string item;
-	string main_tmp="";
-	int count=0,src=0,dest;
+	string main_tmp = "";
+	int count = 0, src = 0, dest;
 	while (getline(ss, item, delim)) {
-		if(item.find(",")!=string::npos){
+		if (item.find(",") != string::npos) {
 			stringstream ss(item);
-			while (getline(ss, item, ',')){
-				cout<<main_tmp<<" : "<<item<<endl;
+			while (getline(ss, item, ',')) {
+				cout << main_tmp << " : " << item << endl;
 
-				edge_add(stoi(main_tmp),stoi(item),adj);
+				edge_add(stoi(main_tmp), stoi(item), adj);
 			}
-			count=0;
-		}else if(count==1){
-			count=1;
-			cout<<main_tmp<<" : "<<item<<endl;
+			count = 0;
+		} else if (count == 1) {
+			count = 1;
+			cout << main_tmp << " : " << item << endl;
 		}
 		main_tmp = item;
 		count++;
@@ -190,7 +196,7 @@ void split(const string &s, char delim, vector<int> adj[]) {
 }
 
 // Method read file
-void read_file(string path,vector<int> adj[]) {
+void read_file(string path, vector<int> adj[]) {
 //	Reference - reading the file
 //	http://www.cplusplus.com/doc/tutorial/files/
 
@@ -205,7 +211,7 @@ void read_file(string path,vector<int> adj[]) {
 		while (getline(myfile, line)) {
 			if (line.find("notfound") != string::npos)
 				continue;
-			split(line, ':',adj);
+			split(line, ':', adj);
 		}
 		myfile.close();
 	} else
@@ -215,7 +221,7 @@ void read_file(string path,vector<int> adj[]) {
 int main() {
 
 //	Declarations
-	int V = 999983;
+	int V = 101;
 	vector<int> adj[V];
 	vector<int> predecessor[V];
 	int *sigma = new int[V];
@@ -226,6 +232,8 @@ int main() {
 	map<int, vector<int> > map;
 	queue<int> q;
 	int **shortest_path_dist = new int*[V];
+	string input_filename = "/Users/balaji/Documents/Github_New/HPC/file_100.txt";
+	string output_filename = "/Users/balaji/Documents/Github_New/HPC/BC_100";
 	for (int i = 0; i < V; ++i) {
 		shortest_path_dist[i] = new int[V];
 	}
@@ -236,20 +244,20 @@ int main() {
 
 	cout << "before going in edge add\n";
 //Readign from the file
-	read_file("/Users/balaji/Documents/Github_New/HPC/file.txt", adj);
+	read_file(input_filename, adj);
 //	Adding to the adjacency list
-	edge_add(1, 2, adj);
-	//edge_add(1, 2, adj);
-	edge_add(1, 3, adj);
-	edge_add(1, 4, adj);
-	edge_add(2, 3, adj);
-	edge_add(2, 5, adj);
-	edge_add(3, 4, adj);
-	edge_add(3, 5, adj);
-	edge_add(4, 5, adj);
-	edge_add(5, 6, adj);
-	edge_add(5, 7, adj);
-	edge_add(6, 7, adj);
+//	edge_add(1, 2, adj);
+//	//edge_add(1, 2, adj);
+//	edge_add(1, 3, adj);
+//	edge_add(1, 4, adj);
+//	edge_add(2, 3, adj);
+//	edge_add(2, 5, adj);
+//	edge_add(3, 4, adj);
+//	edge_add(3, 5, adj);
+//	edge_add(4, 5, adj);
+//	edge_add(5, 6, adj);
+//	edge_add(5, 7, adj);
+//	edge_add(6, 7, adj);
 	//edge_add(5, 1, adj);
 	//edge_add(5, 3, adj);
 
@@ -269,7 +277,7 @@ int main() {
 //	graph_print(adj, V);
 
 //	Print Betweenness Centrality
-//	print_BC(BC,V);
+	print_BC(BC, V,output_filename);
 
 	return 0;
 }
