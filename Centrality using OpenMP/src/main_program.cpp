@@ -86,7 +86,7 @@ vector<float> calculate_centrality(int V, vector<int> adj[], vector<int> predece
 //	cout << "went in calculate centrality";
 
 //	iterating through each vertex
-	for (int i = 1; i <= V; i++) {
+	for (int i = 1; i < V; i++) {
 		int source_vertex = 1;
 
 //		Begin of Initialization
@@ -100,9 +100,9 @@ vector<float> calculate_centrality(int V, vector<int> adj[], vector<int> predece
 
 
 		for (int i = 0; i < V; i++) {
-			sigma[i] = 0;
-			distance[i] = -1;
-			delta[i] = 0;
+			sigma.push_back(0);
+			distance.push_back(-1);
+			delta.push_back(0);
 		}
 
 		distance[source_vertex] = 0;
