@@ -32,7 +32,7 @@ using namespace std;
 
 //Method for forming the adjacency list
 void edge_add(int src, int dest, vector<int> adj[]) {
-	cout << "Gone " << src << ":" << dest << "\n";
+//	cout << "Gone " << src << ":" << dest << "\n";
 	adj[src].push_back(dest);
 	adj[dest].push_back(src);
 }
@@ -70,73 +70,11 @@ void initialize(int V, int source_vertex, vector<int> predecessor[], int *sigma,
 }
 
 void print_BC(float* BC, int V) {
+	cout<<"\nBetweenness Centrality \n";
 	for (int i = 1; i <= V; i++)
 		cout << "Vertex  : " << i << " : " << BC[i] << "\n";
 }
 
-void check_method(int V, vector<int> adj[], vector<int> predecessor[],
-		int *sigma, int *distance, float *delta, stack<int> st,
-		map<int, vector<int> > map, queue<int> q, float* CB,
-		int** shortest_path_dist) {
-	cout << "went in test method 15" << "\n";
-
-	//	iterating through each vertex
-//	for (int k = 1; k <= V; k++) {
-		cout << "went in lool";
-		int source_vertex = 1;
-		initialize(V, source_vertex, predecessor, sigma, distance, delta);
-		st = stack<int>();
-		q.push(source_vertex);
-		while (!q.empty()) {
-			int vertex = 0;
-			vertex = q.front();
-			q.pop();
-			st.push(vertex);
-			for (auto &i : adj[vertex]) {
-
-				if (distance[i] < 0) {
-					q.push(i);
-					distance[i] = distance[vertex] + 1;
-				}
-
-				if (distance[i] == distance[vertex] + 1) {
-					sigma[i] = sigma[i] + sigma[vertex];
-
-					//					https://stackoverflow.com/questions/24139428/check-if-element-is-in-the-list-contains
-					bool found = (std::find(predecessor[i].begin(),
-							predecessor[i].end(), vertex)
-							!= predecessor[i].end());
-
-					if (!found)
-						predecessor[i].push_back(vertex);
-				}
-			}
-
-		}
-
-		while (!st.empty()) {
-			int st_neigh = st.top();
-			st.pop();
-			for (auto &vertex_pred : predecessor[st_neigh]) {
-				float tmp_delta = delta[vertex_pred]
-						+ (((float) ((float) sigma[vertex_pred]
-								/ (float) sigma[st_neigh]))
-								* (1 + delta[st_neigh]));
-				delta[vertex_pred] += tmp_delta;
-				if (source_vertex != st_neigh)
-					CB[st_neigh] += delta[st_neigh];
-			}
-		}
-		//            System.out.println("i :" + i);
-		for (int i = 0; i < V; i++)
-			shortest_path_dist[source_vertex][i] = distance[i];
-		//        shortest_path_dist[src] = distance;
-
-//	}
-//	}
-
-	cout << "After completion";
-}
 //Method for calculating the Betweenness Centrality
 void calculate_centrality(int V, vector<int> adj[], vector<int> predecessor[],
 		int *sigma, int *distance, float *delta, stack<int> st,
@@ -146,33 +84,56 @@ void calculate_centrality(int V, vector<int> adj[], vector<int> predecessor[],
 	cout << "went in calculate centrality";
 
 //	iterating through each vertex
-//	for (int i = 1; i <= V; i++) {
+	for (int i = 1; i <= V; i++) {
 		int source_vertex = 1;
-		initialize(V, source_vertex, predecessor, sigma, distance, delta);
+
+//		Begin of Initialization
+		predecessor = new vector<int> [V];
+		sigma = new int[V];
+		distance = new int[V];
+		delta = new float[V];
+
+		for (int i = 0; i < V; i++) {
+			sigma[i] = 0;
+			distance[i] = -1;
+			delta[i] = 0;
+		}
+
+		distance[source_vertex] = 0;
+		sigma[source_vertex] = 1;
+
+//		Finish of Initialization
+
+//		for(int i=0;i<V;i++) cout<<distance[i]<<endl;
 		st = stack<int>();
 		q.push(source_vertex);
 		while (!q.empty()) {
+
 			int vertex = 0;
 			vertex = q.front();
+//			cout<<"q vertex : "<<source_vertex<<"\n";
 			q.pop();
 			st.push(vertex);
 			for (auto &i : adj[vertex]) {
-
+				cout<<"Vertex : " << vertex <<" neighbor :"<<i<<endl;
 				if (distance[i] < 0) {
 					q.push(i);
 					distance[i] = distance[vertex] + 1;
 				}
-
+				cout<<"distance["<<i<<"]"<<"="<<distance[i]<<"\n";
 				if (distance[i] == distance[vertex] + 1) {
 					sigma[i] = sigma[i] + sigma[vertex];
+					cout<<"sigma["<<i<<"] : "<<sigma[i]<<endl;
 
 //					https://stackoverflow.com/questions/24139428/check-if-element-is-in-the-list-contains
 					bool found = (std::find(predecessor[i].begin(),
 							predecessor[i].end(), vertex)
 							!= predecessor[i].end());
 
-					if (!found)
+					if (!found){
 						predecessor[i].push_back(vertex);
+						cout<<"predessor for "<<i<<" is "<<vertex<<endl;
+					}
 				}
 			}
 
@@ -182,27 +143,31 @@ void calculate_centrality(int V, vector<int> adj[], vector<int> predecessor[],
 			int st_neigh = st.top();
 			st.pop();
 			for (auto &vertex_pred : predecessor[st_neigh]) {
+				cout<<"neigh : "<<st_neigh<<" pred : " <<vertex_pred<<endl;
+
+				cout<<"before:\n"<<  "delta["<<vertex_pred<<"] : "<<delta[vertex_pred]
 				float tmp_delta = delta[vertex_pred]
 						+ (((float) ((float) sigma[vertex_pred]
 								/ (float) sigma[st_neigh]))
 								* (1 + delta[st_neigh]));
 				delta[vertex_pred] += tmp_delta;
+
 				if (source_vertex != st_neigh)
 					CB[st_neigh] += delta[st_neigh];
 			}
 		}
 		//            System.out.println("i :" + i);
-		for (int i = 0; i < V; i++)
-			shortest_path_dist[source_vertex][i] = distance[i];
+//		for (int i = 0; i < V; i++)
+//			shortest_path_dist[source_vertex][i] = distance[i];
 //        shortest_path_dist[src] = distance;
 
-//	}
+	}
 }
 
 int main() {
 
 //	Declarations
-	int V = 1000;
+	int V = 50;
 	vector<int> adj[V];
 	vector<int> predecessor[V];
 	int *sigma = new int[V];
@@ -224,21 +189,28 @@ int main() {
 	cout << "before going in edge add\n";
 //	Adding to the adjacency list
 	edge_add(1, 2, adj);
+	//edge_add(1, 2, adj);
+	edge_add(1, 3, adj);
+	edge_add(1, 4, adj);
 	edge_add(2, 3, adj);
+	edge_add(2, 5, adj);
 	edge_add(3, 4, adj);
+	edge_add(3, 5, adj);
 	edge_add(4, 5, adj);
-	edge_add(5, 1, adj);
+	edge_add(5, 6, adj);
+	edge_add(5, 7, adj);
+	edge_add(6, 7, adj);
+	//edge_add(5, 1, adj);
+	//edge_add(5, 3, adj);
 
-
-
-	check_method(V, adj, predecessor, sigma, distance, delta, st, map, q, BC,
-			shortest_path_dist);
-	cout << "before going in calculate centrality" << "\n";
-	print_BC(BC, V);
+//	check_method(V, adj, predecessor, sigma, distance, delta, st, map, q, BC,
+//			shortest_path_dist);
+//	cout << "before going in calculate centrality" << "\n";
+//	print_BC(BC, V);
 
 //	calculating the centrality
-//	calculate_centrality(5, adj, predecessor, sigma, distance, delta, st, map,
-//			q, BC, shortest_path_dist);
+	calculate_centrality(V, adj, predecessor, sigma, distance, delta, st, map,
+			q, BC, shortest_path_dist);
 
 	cout << "After going in calculate centrality" << "\n";
 	print_BC(BC, V);
