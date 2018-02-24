@@ -246,7 +246,7 @@ void read_file(string path, vector<int> adj[]) {
 int main() {
 
 //	Declarations
-	int V = 25001;
+	int V = 100;
 	vector<int> adj[V];
 	vector<int> predecessor[V];
 	vector<int> vector_sigma(V);
@@ -263,7 +263,7 @@ int main() {
 	int **shortest_path_dist = new int*[V];
 	ofstream out;
 	string input_filename =
-			"/Users/balaji/Documents/Github_New/HPC/file_1000.txt";
+			"/Users/balaji/Documents/Github_New/HPC/file_100.txt";
 	string output_filename = "/Users/balaji/Documents/Github_New/HPC/BC_25000.txt";
 	string runtime_file = "/Users/balaji/Documents/Github_New/HPC/code_run_time.txt";
 	clock_t t1,t2;
