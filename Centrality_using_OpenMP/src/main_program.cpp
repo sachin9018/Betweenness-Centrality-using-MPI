@@ -36,10 +36,10 @@ void edge_add(int src, int dest, vector<int> adj[]) {
 void graph_print(vector<int> adj[], int V) {
 
 	for (int u = 0; u < V; u++) {
-//		cout << "Node " << u << " makes an edge with \n";
-		for (auto it = adj[u].begin(); it != adj[u].end(); ++it) {
-//			cout << *it << ":";
-		}
+////		cout << "Node " << u << " makes an edge with \n";
+//		for (vector<int>::iterator it = adj[u].begin(); it != adj[u].end(); ++it) {
+////			cout << *it << ":";
+//		}
 //		cout << "\n";
 	}
 
@@ -75,7 +75,7 @@ void print_BC(vector<float> BC, int V, string file_name) {
 		}
 		 myfile.close();
 	} else
-		cout << "Unable to open file";
+		cout << "Unable to open BC file"<<endl;
 }
 
 //Method for calculating the Betweenness Centrality
@@ -87,7 +87,7 @@ vector<float> calculate_centrality(int V, vector<int> adj[], vector<int> predece
 //	cout << "went in calculate centrality";
 
 //	iterating through each vertex
-	try{
+//	try{
 	for (int i = 1; i < V; i++) {
 //		cout<<"Vertex : "<<i<<endl;
 		int source_vertex = 1;
@@ -174,23 +174,23 @@ vector<float> calculate_centrality(int V, vector<int> adj[], vector<int> predece
 //        shortest_path_dist[src] = distance;
 
 	}
-	} catch (const std::overflow_error& e) {
-		    // this executes if f() throws std::overflow_error (same type rule)
-			cout<<"Overflow Error"<<endl;
-			cout<<e.what();
-		} catch (const std::runtime_error& e) {
-		    // this executes if f() throws std::underflow_error (base class rule)
-			cout<<"Runtime Error"<<endl;
-			cout<<e.what();
-		} catch (const std::exception& e) {
-		    // this executes if f() throws std::logic_error (base class rule)
-			cout<<"Exception Error"<<endl;
-			cout<<e.what();
-		} catch (...) {
-		    // this executes if f() throws std::string or int or any other unrelated type
-			cout<<"Different Error"<<endl;
-	//		cout<<e.what();
-		}
+//	} catch (const std::overflow_error& e) {
+//		    // this executes if f() throws std::overflow_error (same type rule)
+//			cout<<"Overflow Error"<<endl;
+//			cout<<e.what();
+//		} catch (const std::runtime_error& e) {
+//		    // this executes if f() throws std::underflow_error (base class rule)
+//			cout<<"Runtime Error"<<endl;
+//			cout<<e.what();
+//		} catch (const std::exception& e) {
+//		    // this executes if f() throws std::logic_error (base class rule)
+//			cout<<"Exception Error"<<endl;
+//			cout<<e.what();
+//		} catch (...) {
+//		    // this executes if f() throws std::string or int or any other unrelated type
+//			cout<<"Different Error"<<endl;
+//	//		cout<<e.what();
+//		}
 	return CB;
 }
 
@@ -200,7 +200,7 @@ void split(const string &s, char delim, vector<int> adj[]) {
 	stringstream ss(s);
 	string item;
 	string main_tmp = "";
-	int count = 0, src = 0, dest;
+	int count = 0;
 	while (getline(ss, item, delim)) {
 		if (item.find(",") != string::npos) {
 			stringstream ss(item);
@@ -240,10 +240,10 @@ void read_file(string path, vector<int> adj[]) {
 		}
 		myfile.close();
 	} else
-		cout << "Unable to open file";
+		cout << "Unable to open File_100 file"<<endl;
 }
 
-int main() {
+int main(int argc, char* argv[]) {
 
 //	Declarations
 	int V = 100;
@@ -253,19 +253,22 @@ int main() {
 	vector<int> vector_distance(V);
 	vector<float> vector_delta(V);
 	vector<float> vector_BC(V);
-	int *sigma = new int[V];
-	int *distance = new int[V];
-	float *delta = new float[V];
-	float * BC = new float[V];
+//	int *sigma = new int[V];
+//	int *distance = new int[V];
+//	float *delta = new float[V];
+//	float * BC = new float[V];
 	stack<int> st;
 	map<int, vector<int> > map;
 	queue<int> q;
 	int **shortest_path_dist = new int*[V];
 	ofstream out;
-	string input_filename =
-			"/Users/balaji/Documents/Github_New/HPC/file_100.txt";
-	string output_filename = "/Users/balaji/Documents/Github_New/HPC/BC_25000.txt";
-	string runtime_file = "/Users/balaji/Documents/Github_New/HPC/code_run_time.txt";
+	string input_filename = argv[1];
+	string output_filename = argv[2];
+	string runtime_file = argv[3];
+//	string input_filename =
+//			"sgandham@hpc.oit.uci.edu:/data/users/sgandham/Betweenness-Centrality-using-OpenMp/Centrality_using_OpenMP/src/file_100.txt";
+//	string output_filename = "sgandham@hpc.oit.uci.edu:/data/users/sgandham/Betweenness-Centrality-using-OpenMp/Centrality_using_OpenMP/src/BC_100.txt";
+//	string runtime_file = "sgandham@hpc.oit.uci.edu:/data/users/sgandham/Betweenness-Centrality-using-OpenMp/Centrality_using_OpenMP/src/code_run_time.txt";
 	clock_t t1,t2;
 	for (int i = 0; i < V; ++i) {
 		shortest_path_dist[i] = new int[V];
@@ -277,7 +280,7 @@ int main() {
 
 //	cout << "before going in edge add\n";
 //	Reading from the file
-	try{
+//	try{
 	read_file(input_filename, adj);
 
 	cout<<"Calculation of Betweenness Centrality Started"<<endl;
@@ -301,22 +304,22 @@ int main() {
 
 //	Print Betweenness Centrality
 	print_BC(vector_BC, V, output_filename);
-	} catch (const std::overflow_error& e) {
-	    // this executes if f() throws std::overflow_error (same type rule)
-		cout<<"Overflow Error"<<endl;
-		cout<<e.what();
-	} catch (const std::runtime_error& e) {
-	    // this executes if f() throws std::underflow_error (base class rule)
-		cout<<"Runtime Error"<<endl;
-		cout<<e.what();
-	} catch (const std::exception& e) {
-	    // this executes if f() throws std::logic_error (base class rule)
-		cout<<"Exception Error"<<endl;
-		cout<<e.what();
-	} catch (...) {
-	    // this executes if f() throws std::string or int or any other unrelated type
-		cout<<"Different Error"<<endl;
+//	} catch (const std::overflow_error& e) {
+//	    // this executes if f() throws std::overflow_error (same type rule)
+//		cout<<"Overflow Error"<<endl;
 //		cout<<e.what();
-	}
+//	} catch (const std::runtime_error& e) {
+//	    // this executes if f() throws std::underflow_error (base class rule)
+//		cout<<"Runtime Error"<<endl;
+//		cout<<e.what();
+//	} catch (const std::exception& e) {
+//	    // this executes if f() throws std::logic_error (base class rule)
+//		cout<<"Exception Error"<<endl;
+//		cout<<e.what();
+//	} catch (...) {
+//	    // this executes if f() throws std::string or int or any other unrelated type
+//		cout<<"Different Error"<<endl;
+////		cout<<e.what();
+//	}
 	return 0;
 }
