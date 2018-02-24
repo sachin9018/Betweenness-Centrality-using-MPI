@@ -87,7 +87,9 @@ vector<float> calculate_centrality(int V, vector<int> adj[], vector<int> predece
 //	cout << "went in calculate centrality";
 
 //	iterating through each vertex
+	try{
 	for (int i = 1; i < V; i++) {
+//		cout<<"Vertex : "<<i<<endl;
 		int source_vertex = 1;
 
 //		Begin of Initialization
@@ -172,7 +174,23 @@ vector<float> calculate_centrality(int V, vector<int> adj[], vector<int> predece
 //        shortest_path_dist[src] = distance;
 
 	}
-
+	} catch (const std::overflow_error& e) {
+		    // this executes if f() throws std::overflow_error (same type rule)
+			cout<<"Overflow Error"<<endl;
+			cout<<e.what();
+		} catch (const std::runtime_error& e) {
+		    // this executes if f() throws std::underflow_error (base class rule)
+			cout<<"Runtime Error"<<endl;
+			cout<<e.what();
+		} catch (const std::exception& e) {
+		    // this executes if f() throws std::logic_error (base class rule)
+			cout<<"Exception Error"<<endl;
+			cout<<e.what();
+		} catch (...) {
+		    // this executes if f() throws std::string or int or any other unrelated type
+			cout<<"Different Error"<<endl;
+	//		cout<<e.what();
+		}
 	return CB;
 }
 
@@ -228,7 +246,7 @@ void read_file(string path, vector<int> adj[]) {
 int main() {
 
 //	Declarations
-	int V = 10001;
+	int V = 25001;
 	vector<int> adj[V];
 	vector<int> predecessor[V];
 	vector<int> vector_sigma(V);
@@ -245,9 +263,9 @@ int main() {
 	int **shortest_path_dist = new int*[V];
 	ofstream out;
 	string input_filename =
-			"/Users/balaji/Documents/Github_New/HPC/file_100.txt";
-	string output_filename = "/Users/balaji/Documents/Github_New/HPC/BC_100.txt";
-	string runtime_file = "/Users/balaji/Documents/Github_New/HPC/run_time.txt";
+			"/Users/balaji/Documents/Github_New/HPC/file_1000.txt";
+	string output_filename = "/Users/balaji/Documents/Github_New/HPC/BC_25000.txt";
+	string runtime_file = "/Users/balaji/Documents/Github_New/HPC/code_run_time.txt";
 	clock_t t1,t2;
 	for (int i = 0; i < V; ++i) {
 		shortest_path_dist[i] = new int[V];
@@ -259,6 +277,7 @@ int main() {
 
 //	cout << "before going in edge add\n";
 //	Reading from the file
+	try{
 	read_file(input_filename, adj);
 
 	cout<<"Calculation of Betweenness Centrality Started"<<endl;
@@ -268,7 +287,8 @@ int main() {
 			q, vector_BC, shortest_path_dist);
 	 t2=clock();
 	cout<<"Calculation of Betweenness Centrality ended"<<endl;
-	float run_time = ((float)t2-(float)t1);
+//	float run_time = ((float)t2-(float)t1);
+	double run_time = double(t2 - t1) / CLOCKS_PER_SEC;
 	cout<<"Centrality calculated in : %f"<<run_time<<endl;
 	out.open(runtime_file, std::ios::app);
 	out<<"\nRun Time for : "<<V<<" : vertices is : ";
@@ -281,6 +301,22 @@ int main() {
 
 //	Print Betweenness Centrality
 	print_BC(vector_BC, V, output_filename);
-
+	} catch (const std::overflow_error& e) {
+	    // this executes if f() throws std::overflow_error (same type rule)
+		cout<<"Overflow Error"<<endl;
+		cout<<e.what();
+	} catch (const std::runtime_error& e) {
+	    // this executes if f() throws std::underflow_error (base class rule)
+		cout<<"Runtime Error"<<endl;
+		cout<<e.what();
+	} catch (const std::exception& e) {
+	    // this executes if f() throws std::logic_error (base class rule)
+		cout<<"Exception Error"<<endl;
+		cout<<e.what();
+	} catch (...) {
+	    // this executes if f() throws std::string or int or any other unrelated type
+		cout<<"Different Error"<<endl;
+//		cout<<e.what();
+	}
 	return 0;
 }
