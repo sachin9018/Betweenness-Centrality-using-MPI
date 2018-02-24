@@ -1,0 +1,16 @@
+
+Sequential Algorihm
+
+The betweenness centrality is calculated by considering each vertex as the source vertex. Betweenness Centrality
+has been calculated in two stages. In the first stage, the number of shortest paths and the predecessors for the
+vertex are stored. In the second stage, the betweenness centrality is calculated based on the shortest path ratios.
+Brande has assumed that vertex 'v' can lie on the shortest path between source vertex 's' and destination vertex 't'
+if and only if dG(s,t) = dG(s, v) + dG(v,t). Once the equation is satisfied shortest path is incremented by using
+the equation, sigma[neighbor] += sigma[vertex]. Also, the vertex is considered as predecessor and added to the predecessors
+list of the neighbor. Each of the vertex of the graph is pushed in to the stack.
+
+For the second stage, each vertex from the stack is used to calculate the Delta and Betweenness Centrality. Delta
+for each predecessor can be calculated by δ[v] += (σ[v]/σ[w])(1 + δ[w]), where δ[v] = shortest path ratio of predecessor,
+δ[w] = shortest path ratio of vertex of stack,σ[v] = total number of shortest paths for predecessor v, σ[w] = total
+number of shortest path of each vertex of stack. The betweenness centrality can be calculated using the formula
+CB[w] = CB[w] + δ[w],where CB[w] = Betweenness Centrality for vertex of stack. 
