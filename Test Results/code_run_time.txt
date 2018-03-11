@@ -1,9 +1,0 @@
-
-Run Time for : 101 : vertices is : 0.005091
-Run Time for : 501 : vertices is : 0.052265
-Run Time for : 1001 : vertices is : 0.826267
-Run Time for : 5001 : vertices is : 5.29788
-Run Time for : 10001 : vertices is : 14.1961
-Run Time for : 15001 : vertices is : 26.69
-Run Time for : 20001 : vertices is : 43.3632
-Run Time for : 25001 : vertices is : 63.9415
