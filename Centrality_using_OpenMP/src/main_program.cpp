@@ -27,8 +27,7 @@ using namespace std;
 
 //Method for forming the adjacency list
 void edge_add(long src, long dest, vector<long> adj[]) {
-	cout << src << " : " << dest << endl;
-//	cout << "Gone " << src << ":" << dest << "\n";
+	cout << src << ":" << dest << endl;
 	adj[src].push_back(dest);
 	adj[dest].push_back(src);
 }
@@ -49,7 +48,7 @@ void graph_prlong(vector<long> adj[], long V) {
 //Method for initializing the arrays and variables for each source vertex
 void initialize(long V, long source_vertex, vector<long> predecessor[],
 		vector<long> vector_sigma, vector<long> vector_distance,
-		vector<double> vector_delta) {
+		vector<float> vector_delta) {
 	predecessor = new vector<long> [V];
 	vector_sigma.clear();
 	vector_distance.clear();
@@ -66,7 +65,7 @@ void initialize(long V, long source_vertex, vector<long> predecessor[],
 	vector_sigma[source_vertex] = 1;
 }
 
-void prlong_BC(vector<double> BC, long V, string file_name) {
+void prlong_BC(vector<float> BC, long V, string file_name) {
 	cout << "\nBetweenness Centrality \n";
 	ofstream myfile(file_name);
 	if (myfile.is_open()) {
@@ -81,33 +80,32 @@ void prlong_BC(vector<double> BC, long V, string file_name) {
 }
 
 //Method for calculating the Betweenness Centrality
-vector<double> calculate_centrality(long V, vector<long> adj[],
-		vector<long> predecessor[], vector<long> sigma, vector<long> distance,
-		vector<double> delta, stack<long> st,
-		queue<long> q, vector<double> CB, long** shortest_path_dist) {
+vector<float> calculate_centrality(long V, vector<long> adj[],
+		vector<long> predecessor[], stack<long> st,
+		queue<long> q, vector<float> CB) {
 
 //	cout << "went in calculate centrality";
 
 //	iterating through each vertex
 //	try{
 	for (long i = 1; i < V; i++) {
-//		cout<<"Vertex : "<<i<<endl;
+		cout << "Vertex : " << i << endl;
 		long source_vertex = 1;
 
 //		Begin of Initialization
 		predecessor = new vector<long> [V];
-//		sigma = new long[V];
-//		distance = new long[V];
-//		delta = new double[V];
-		sigma.clear();
-		delta.clear();
-		distance.clear();
-
-		for (long i = 0; i < V; i++) {
-			sigma.push_back(0);
-			distance.push_back(-1);
-			delta.push_back(0);
-		}
+		vector<long> sigma(V,0);
+		vector<long> distance(V,-1);
+		vector<long> delta(V,0);
+//		sigma.clear();
+//		delta.clear();
+//		distance.clear();
+//
+//		for (long i = 0; i < V; i++) {
+//			sigma.push_back(0);
+//			distance.push_back(-1);
+//			delta.push_back(0);
+//		}
 
 		distance[source_vertex] = 0;
 		sigma[source_vertex] = 1;
@@ -159,9 +157,9 @@ vector<double> calculate_centrality(long V, vector<long> adj[],
 
 //				cout << "before:\n" << "delta[" << vertex_pred << "] : "
 //						<< delta[vertex_pred];
-				double tmp_delta = delta[vertex_pred]
-						+ (((double) ((double) sigma[vertex_pred]
-								/ (double) sigma[st_neigh]))
+				float tmp_delta = delta[vertex_pred]
+						+ (((float) ((float) sigma[vertex_pred]
+								/ (float) sigma[st_neigh]))
 								* (1 + delta[st_neigh]));
 				delta[vertex_pred] += tmp_delta;
 
@@ -197,7 +195,7 @@ vector<double> calculate_centrality(long V, vector<long> adj[],
 
 //	  Reference - split functionality
 //	  http://ysonggit.github.io/coding/2014/12/16/split-a-string-using-c.html
-void split(const string &s, vector<long> adj[]) {
+void split(const string &s, vector<long> adj[], long V) {
 	stringstream ss(s);
 	vector<string> tokens;
 	string buf;
@@ -205,12 +203,12 @@ void split(const string &s, vector<long> adj[]) {
 	bool var_bool = true;
 	long src = 0, dest = 0;
 	while (ss >> buf) {
-//		vect.push_back(stoi(buf));
+//		vect.push_back(stol(buf));
 		if (var_bool) {
-			src = stoi(buf);
+			src = stol(buf);
 			var_bool = false;
 		} else {
-			dest = stoi(buf);
+			dest = stol(buf);
 			var_bool = true;
 		}
 
@@ -218,7 +216,7 @@ void split(const string &s, vector<long> adj[]) {
 //		cout<<" : ";
 	}
 //	cout<<endl;
-	if (src < LONG_MAX && dest < LONG_MAX)
+	if (src < V && dest < V)
 		edge_add(src, dest, adj);
 //	string item;
 //	string main_tmp = "";
@@ -229,7 +227,7 @@ void split(const string &s, vector<long> adj[]) {
 //			while (getline(ss, item, ',')) {
 ////				cout << main_tmp << " : " << item << endl;
 //
-//				edge_add(stoi(main_tmp), stoi(item), adj);
+//				edge_add(stol(main_tmp), stol(item), adj);
 //			}
 //			count = 0;
 //		} else if (count == 1) {
@@ -243,7 +241,7 @@ void split(const string &s, vector<long> adj[]) {
 }
 
 // Method read file
-void read_file(string path, vector<long> adj[]) {
+void read_file(string path, vector<long> adj[], long V) {
 //	Reference - reading the file
 //	http://www.cplusplus.com/doc/tutorial/files/
 
@@ -254,11 +252,16 @@ void read_file(string path, vector<long> adj[]) {
 	vector<string> tokens;
 //	  Reference - split functionality
 //	  http://ysonggit.github.io/coding/2014/12/16/split-a-string-using-c.html
+
 	if (myfile.is_open()) {
 		while (getline(myfile, line)) {
+			cout << line << endl;
 			if (line.find("#") != string::npos)
 				continue;
-			split(line, adj);
+			if (line.find(":") != string::npos)
+				continue;
+			split(line, adj, V);
+//			if(++count>100) break;
 		}
 		myfile.close();
 	} else
@@ -268,52 +271,61 @@ void read_file(string path, vector<long> adj[]) {
 int main(int argc, char* argv[]) {
 
 //	Declarations
-	long V = LONG_MAX;
-
+	long V = stol(argv[4]);
+	cout<<"Vertex declared";
 	vector<long> adj[V];
+	cout<<"adj declared";
 	vector<long> predecessor[V];
-	vector<long> vector_sigma(V);
-	vector<long> vector_distance(V);
-	vector<double> vector_delta(V);
-	vector<double> vector_BC(V);
-//	long *sigma = new long[V];
-//	long *distance = new long[V];
-//	double *delta = new double[V];
-//	double * BC = new double[V];
+	cout<<"Predecessor declared";
+	vector<float> vector_BC(V,0);
+	cout<<"vector_BC declared";
 	stack<long> st;
+	cout<<"vector_BC declared";
+//	map<long, vector<long> > map;
 	queue<long> q;
-	long **shortest_path_dist = new long*[V];
-	ofstream out;
 	string input_filename = argv[1];
 	string output_filename = argv[2];
 	string runtime_file = argv[3];
+	ofstream out;
+	clock_t t1, t2;
+//	vector<long> vector_sigma(V);
+//	vector<long> vector_distance(V);
+//	vector<float> vector_delta(V);
+
+//	long *sigma = new long[V];
+//	long *distance = new long[V];
+//	float *delta = new float[V];
+//	float * BC = new float[V];
+
+//	long **shortest_path_dist = new long*[V];
+
+
 //	string input_filename =
 //			"sgandham@hpc.oit.uci.edu:/data/users/sgandham/Betweenness-Centrality-using-OpenMp/Centrality_using_OpenMP/src/file_100.txt";
 //	string output_filename = "sgandham@hpc.oit.uci.edu:/data/users/sgandham/Betweenness-Centrality-using-OpenMp/Centrality_using_OpenMP/src/BC_100.txt";
 //	string runtime_file = "sgandham@hpc.oit.uci.edu:/data/users/sgandham/Betweenness-Centrality-using-OpenMp/Centrality_using_OpenMP/src/code_run_time.txt";
-	clock_t t1, t2;
-	for (long i = 0; i < V; ++i) {
-		shortest_path_dist[i] = new long[V];
-	}
 
-	for (long i = 0; i < V; ++i) {
-		vector_BC.push_back(0);
-	}
+//	for (long i = 0; i < V; ++i) {
+//		shortest_path_dist[i] = new long[V];
+//	}
+
+//	for (long i = 0; i < V; ++i) {
+//		vector_BC.push_back(0);
+//	}
 
 //	cout << "before going in edge add\n";
 //	Reading from the file
 //	try{
-	read_file(input_filename, adj);
+	cout<<"Started Reading the file";
+	read_file(input_filename, adj, V);
 
 	cout << "Calculation of Betweenness Centrality Started" << endl;
 	t1 = clock();
 //	calculating the centrality
-	vector_BC = calculate_centrality(V, adj, predecessor, vector_sigma,
-			vector_distance, vector_delta, st, q, vector_BC,
-			shortest_path_dist);
+	vector_BC = calculate_centrality(V, adj, predecessor,st,q, vector_BC);
 	t2 = clock();
 	cout << "Calculation of Betweenness Centrality ended" << endl;
-//	double run_time = ((double)t2-(double)t1);
+//	float run_time = ((float)t2-(float)t1);
 	double run_time = double(t2 - t1) / CLOCKS_PER_SEC;
 	cout << "Centrality calculated in : %f" << run_time << endl;
 	out.open(runtime_file, std::ios::app);
