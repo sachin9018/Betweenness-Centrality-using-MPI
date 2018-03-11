@@ -49,7 +49,7 @@ void graph_prlong(vector<long> adj[], long V) {
 //Method for initializing the arrays and variables for each source vertex
 void initialize(long V, long source_vertex, vector<long> predecessor[],
 		vector<long> vector_sigma, vector<long> vector_distance,
-		vector<float> vector_delta) {
+		vector<double> vector_delta) {
 	predecessor = new vector<long> [V];
 	vector_sigma.clear();
 	vector_distance.clear();
@@ -66,7 +66,7 @@ void initialize(long V, long source_vertex, vector<long> predecessor[],
 	vector_sigma[source_vertex] = 1;
 }
 
-void prlong_BC(vector<float> BC, long V, string file_name) {
+void prlong_BC(vector<double> BC, long V, string file_name) {
 	cout << "\nBetweenness Centrality \n";
 	ofstream myfile(file_name);
 	if (myfile.is_open()) {
@@ -81,10 +81,10 @@ void prlong_BC(vector<float> BC, long V, string file_name) {
 }
 
 //Method for calculating the Betweenness Centrality
-vector<float> calculate_centrality(long V, vector<long> adj[],
+vector<double> calculate_centrality(long V, vector<long> adj[],
 		vector<long> predecessor[], vector<long> sigma, vector<long> distance,
-		vector<float> delta, stack<long> st, map<long, vector<long> > map,
-		queue<long> q, vector<float> CB, long** shortest_path_dist) {
+		vector<double> delta, stack<long> st,
+		queue<long> q, vector<double> CB, long** shortest_path_dist) {
 
 //	cout << "went in calculate centrality";
 
@@ -98,7 +98,7 @@ vector<float> calculate_centrality(long V, vector<long> adj[],
 		predecessor = new vector<long> [V];
 //		sigma = new long[V];
 //		distance = new long[V];
-//		delta = new float[V];
+//		delta = new double[V];
 		sigma.clear();
 		delta.clear();
 		distance.clear();
@@ -159,9 +159,9 @@ vector<float> calculate_centrality(long V, vector<long> adj[],
 
 //				cout << "before:\n" << "delta[" << vertex_pred << "] : "
 //						<< delta[vertex_pred];
-				float tmp_delta = delta[vertex_pred]
-						+ (((float) ((float) sigma[vertex_pred]
-								/ (float) sigma[st_neigh]))
+				double tmp_delta = delta[vertex_pred]
+						+ (((double) ((double) sigma[vertex_pred]
+								/ (double) sigma[st_neigh]))
 								* (1 + delta[st_neigh]));
 				delta[vertex_pred] += tmp_delta;
 
@@ -268,20 +268,19 @@ void read_file(string path, vector<long> adj[]) {
 int main(int argc, char* argv[]) {
 
 //	Declarations
-	long V = LONG_MIN;
+	long V = LONG_MAX;
 
 	vector<long> adj[V];
 	vector<long> predecessor[V];
 	vector<long> vector_sigma(V);
 	vector<long> vector_distance(V);
-	vector<float> vector_delta(V);
-	vector<float> vector_BC(V);
+	vector<double> vector_delta(V);
+	vector<double> vector_BC(V);
 //	long *sigma = new long[V];
 //	long *distance = new long[V];
-//	float *delta = new float[V];
-//	float * BC = new float[V];
+//	double *delta = new double[V];
+//	double * BC = new double[V];
 	stack<long> st;
-	map<long, vector<long> > map;
 	queue<long> q;
 	long **shortest_path_dist = new long*[V];
 	ofstream out;
@@ -310,11 +309,11 @@ int main(int argc, char* argv[]) {
 	t1 = clock();
 //	calculating the centrality
 	vector_BC = calculate_centrality(V, adj, predecessor, vector_sigma,
-			vector_distance, vector_delta, st, map, q, vector_BC,
+			vector_distance, vector_delta, st, q, vector_BC,
 			shortest_path_dist);
 	t2 = clock();
 	cout << "Calculation of Betweenness Centrality ended" << endl;
-//	float run_time = ((float)t2-(float)t1);
+//	double run_time = ((double)t2-(double)t1);
 	double run_time = double(t2 - t1) / CLOCKS_PER_SEC;
 	cout << "Centrality calculated in : %f" << run_time << endl;
 	out.open(runtime_file, std::ios::app);
