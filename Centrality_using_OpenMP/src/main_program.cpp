@@ -24,31 +24,39 @@
 #include <sstream>
 
 using namespace std;
-set<int> set_vertice_src;
-
+map<int, vector<int> > adj;
 //Method for forming the adjacency list
-void edge_add(int src, int dest, vector<int> adj[]) {
-//	cout << "Gone " << src << ":" << dest << "\n";
+void edge_add(int src, int dest) {
+	cout << "Gone " << src << ":" << dest << "\n";
 	adj[src].push_back(dest);
 	adj[dest].push_back(src);
+//	(*adj)[src].push_back(dest);
+//	(*adj)[dest].push_back(src);
 }
 
-//Method for printing the graph
-void graph_print(vector<int> adj[], int V) {
+//Method for printing the adj
+void adj_print() {
 
-	for (int u = 0; u < V; u++) {
-////		cout << "Node " << u << " makes an edge with \n";
+//	for (int u = 0; u < V; u++) {
+//		cout << "Node " << u << " makes an edge with \n";
 //		for (vector<int>::iterator it = adj[u].begin(); it != adj[u].end(); ++it) {
-////			cout << *it << ":";
+//			cout << *it << ":";
 //		}
 //		cout << "\n";
+//	}
+	for (const auto& pair : adj) {
+		std::cout << "key: " << pair.first << "  value: [  ";
+		for (int d : pair.second)
+			std::cout << d << "  ";
+		std::cout << "]\n";
 	}
 
 }
 
 //Method for initializing the arrays and variables for each source vertex
-void initialize(int V, int source_vertex, vector<int> predecessor[], vector<int> vector_sigma,
-		vector<int> vector_distance, vector<float> vector_delta) {
+void initialize(int V, int source_vertex, vector<int> predecessor[],
+		vector<int> vector_sigma, vector<int> vector_distance,
+		vector<float> vector_delta) {
 	predecessor = new vector<int> [V];
 	vector_sigma.clear();
 	vector_distance.clear();
@@ -74,16 +82,16 @@ void print_BC(vector<float> BC, int V, string file_name) {
 			myfile << i << " : ";
 			myfile << BC[i] << "\n";
 		}
-		 myfile.close();
+		myfile.close();
 	} else
-		cout << "Unable to open BC file"<<endl;
+		cout << "Unable to open BC file" << endl;
 }
 
 //Method for calculating the Betweenness Centrality
-vector<float> calculate_centrality(int V, vector<int> adj[], vector<int> predecessor[],
-		vector<int> sigma, vector<int> distance, vector<float> delta, stack<int> st,
-		map<int, vector<int> > map, queue<int> q, vector<float> CB,
-		int** shortest_path_dist) {
+vector<float> calculate_centrality(int V, vector<int> adj[],
+		vector<int> predecessor[], vector<int> sigma, vector<int> distance,
+		vector<float> delta, stack<int> st, map<int, vector<int> > map,
+		queue<int> q, vector<float> CB, int** shortest_path_dist) {
 
 //	cout << "went in calculate centrality";
 
@@ -91,7 +99,7 @@ vector<float> calculate_centrality(int V, vector<int> adj[], vector<int> predece
 //	try{
 	for (int i = 1; i < V; i++) {
 //		cout<<"Vertex : "<<i<<endl;
-		int source_vertex = i;
+		int source_vertex = 1;
 
 //		Begin of Initialization
 		predecessor = new vector<int> [V];
@@ -101,7 +109,6 @@ vector<float> calculate_centrality(int V, vector<int> adj[], vector<int> predece
 		sigma.clear();
 		delta.clear();
 		distance.clear();
-
 
 		for (int i = 0; i < V; i++) {
 			sigma.push_back(0);
@@ -165,11 +172,8 @@ vector<float> calculate_centrality(int V, vector<int> adj[], vector<int> predece
 								* (1 + delta[st_neigh]));
 				delta[vertex_pred] += tmp_delta;
 
-				if (source_vertex != st_neigh){
-
+				if (source_vertex != st_neigh)
 					CB[st_neigh] += delta[st_neigh];
-					cout<<"CB for st_neigh" << CB[st_neigh];
-				}
 			}
 		}
 		//            System.out.println("i :" + i);
@@ -200,32 +204,53 @@ vector<float> calculate_centrality(int V, vector<int> adj[], vector<int> predece
 
 //	  Reference - split functionality
 //	  http://ysonggit.github.io/coding/2014/12/16/split-a-string-using-c.html
-void split(const string &s, char delim, vector<int> adj[]) {
+void split(const string &s, int V) {
 	stringstream ss(s);
-	string item;
-	string main_tmp = "";
-	int count = 0;
-	while (getline(ss, item, delim)) {
-		if (item.find(",") != string::npos) {
-			stringstream ss(item);
-			while (getline(ss, item, ',')) {
-//				cout << main_tmp << " : " << item << endl;
-
-				edge_add(stoi(main_tmp), stoi(item), adj);
-			}
-			count = 0;
-		} else if (count == 1) {
-			count = 1;
-//			cout << main_tmp << " : " << item << endl;
+	vector<string> tokens;
+	string buf;
+	vector<long> vect(2);
+	bool var_bool = true;
+	long src = 0, dest = 0;
+	while (ss >> buf) {
+//		vect.push_back(stol(buf));
+		if (var_bool) {
+			src = stol(buf);
+			var_bool = false;
+		} else {
+			dest = stol(buf);
+			var_bool = true;
 		}
-		main_tmp = item;
-		count++;
 
+//		cout<<buf;
+//		cout<<" : ";
 	}
+//	cout<<endl;
+	if (src < V && dest < V)
+		edge_add(src, dest);
+//	string item;
+//	string main_tmp = "";
+//	long count = 0;
+//	while (getline(ss, item, delim)) {
+//		if (item.find(",") != string::npos) {
+//			stringstream ss(item);
+//			while (getline(ss, item, ',')) {
+////				cout << main_tmp << " : " << item << endl;
+//
+//				edge_add(stol(main_tmp), stol(item), adj);
+//			}
+//			count = 0;
+//		} else if (count == 1) {
+//			count = 1;
+////			cout << main_tmp << " : " << item << endl;
+//		}
+//		main_tmp = item;
+//		count++;
+//
+//	}
 }
 
 // Method read file
-void read_file(string path, vector<int> adj[]) {
+void read_file(string path, long V) {
 //	Reference - reading the file
 //	http://www.cplusplus.com/doc/tutorial/files/
 
@@ -236,21 +261,26 @@ void read_file(string path, vector<int> adj[]) {
 	vector<string> tokens;
 //	  Reference - split functionality
 //	  http://ysonggit.github.io/coding/2014/12/16/split-a-string-using-c.html
+
 	if (myfile.is_open()) {
 		while (getline(myfile, line)) {
-			if (line.find("notfound") != string::npos)
+			cout << line << endl;
+			if (line.find("#") != string::npos)
 				continue;
-			split(line, ':', adj);
+			if (line.find(":") != string::npos)
+				continue;
+			split(line, V);
+//			if(++count>100) break;
 		}
 		myfile.close();
 	} else
-		cout << "Unable to open File_100 file"<<endl;
+		cout << "Unable to open File_100 file" << endl;
 }
 
 int main(int argc, char* argv[]) {
 
 //	Declarations
-	int V = 11;
+	int V = 100;
 	vector<int> adj[V];
 	vector<int> predecessor[V];
 	vector<int> vector_sigma(V);
@@ -273,7 +303,7 @@ int main(int argc, char* argv[]) {
 //			"sgandham@hpc.oit.uci.edu:/data/users/sgandham/Betweenness-Centrality-using-OpenMp/Centrality_using_OpenMP/src/file_100.txt";
 //	string output_filename = "sgandham@hpc.oit.uci.edu:/data/users/sgandham/Betweenness-Centrality-using-OpenMp/Centrality_using_OpenMP/src/BC_100.txt";
 //	string runtime_file = "sgandham@hpc.oit.uci.edu:/data/users/sgandham/Betweenness-Centrality-using-OpenMp/Centrality_using_OpenMP/src/code_run_time.txt";
-	clock_t t1,t2;
+	clock_t t1, t2;
 	for (int i = 0; i < V; ++i) {
 		shortest_path_dist[i] = new int[V];
 	}
@@ -285,45 +315,32 @@ int main(int argc, char* argv[]) {
 //	cout << "before going in edge add\n";
 //	Reading from the file
 //	try{
-	read_file(input_filename, adj);
-
-	cout<<"Calculation of Betweenness Centrality Started"<<endl;
-	 t1=clock();
+	cout << "reading teh file" << endl;
+	read_file(input_filename, V);
+	cout << "reading teh file finished" << endl;
+	adj_print();
+	cout << "Calculation of Betweenness Centrality Started" << endl;
+	t1 = clock();
 //	calculating the centrality
-	vector_BC = calculate_centrality(V, adj, predecessor, vector_sigma, vector_distance, vector_delta, st, map,
-			q, vector_BC, shortest_path_dist);
-	 t2=clock();
-	cout<<"Calculation of Betweenness Centrality ended"<<endl;
+	vector_BC = calculate_centrality(V, adj, predecessor, vector_sigma,
+			vector_distance, vector_delta, st, map, q, vector_BC,
+			shortest_path_dist);
+	t2 = clock();
+	cout << "Calculation of Betweenness Centrality ended" << endl;
 //	float run_time = ((float)t2-(float)t1);
 	double run_time = double(t2 - t1) / CLOCKS_PER_SEC;
-	cout<<"Centrality calculated in : %f"<<run_time<<endl;
+	cout << "Centrality calculated in : %f" << run_time << endl;
 	out.open(runtime_file, std::ios::app);
-	out<<"\nRun Time for : "<<V<<" : vertices is : ";
-	out<<run_time;
+	out << "\nRun Time for : " << V << " : vertices is : ";
+	out << run_time;
 	out.close();
 //	print_BC(BC, V);
 
-//	Printing the graph
-//	graph_print(adj, V);
+//	Printing the adj
+//	adj_print(adj, V);
 
 //	Print Betweenness Centrality
 	print_BC(vector_BC, V, output_filename);
-//	} catch (const std::overflow_error& e) {
-//	    // this executes if f() throws std::overflow_error (same type rule)
-//		cout<<"Overflow Error"<<endl;
-//		cout<<e.what();
-//	} catch (const std::runtime_error& e) {
-//	    // this executes if f() throws std::underflow_error (base class rule)
-//		cout<<"Runtime Error"<<endl;
-//		cout<<e.what();
-//	} catch (const std::exception& e) {
-//	    // this executes if f() throws std::logic_error (base class rule)
-//		cout<<"Exception Error"<<endl;
-//		cout<<e.what();
-//	} catch (...) {
-//	    // this executes if f() throws std::string or int or any other unrelated type
-//		cout<<"Different Error"<<endl;
-////		cout<<e.what();
-//	}
+
 	return 0;
 }
