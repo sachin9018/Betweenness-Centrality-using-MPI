@@ -24,6 +24,7 @@
 #include <sstream>
 
 using namespace std;
+set<int> set_vertice_src;
 
 //Method for forming the adjacency list
 void edge_add(int src, int dest, vector<int> adj[]) {
@@ -90,7 +91,7 @@ vector<float> calculate_centrality(int V, vector<int> adj[], vector<int> predece
 //	try{
 	for (int i = 1; i < V; i++) {
 //		cout<<"Vertex : "<<i<<endl;
-		int source_vertex = 1;
+		int source_vertex = i;
 
 //		Begin of Initialization
 		predecessor = new vector<int> [V];
@@ -164,8 +165,11 @@ vector<float> calculate_centrality(int V, vector<int> adj[], vector<int> predece
 								* (1 + delta[st_neigh]));
 				delta[vertex_pred] += tmp_delta;
 
-				if (source_vertex != st_neigh)
+				if (source_vertex != st_neigh){
+
 					CB[st_neigh] += delta[st_neigh];
+					cout<<"CB for st_neigh" << CB[st_neigh];
+				}
 			}
 		}
 		//            System.out.println("i :" + i);
@@ -246,7 +250,7 @@ void read_file(string path, vector<int> adj[]) {
 int main(int argc, char* argv[]) {
 
 //	Declarations
-	int V = 100;
+	int V = 11;
 	vector<int> adj[V];
 	vector<int> predecessor[V];
 	vector<int> vector_sigma(V);
