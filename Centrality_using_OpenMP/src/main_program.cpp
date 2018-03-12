@@ -24,10 +24,12 @@
 #include <sstream>
 
 using namespace std;
+
 map<int, vector<int> > adj;
+
 //Method for forming the adjacency list
 void edge_add(int src, int dest) {
-	cout << "Gone " << src << ":" << dest << "\n";
+//	cout << "Gone " << src << ":" << dest << "\n";
 	adj[src].push_back(dest);
 	adj[dest].push_back(src);
 //	(*adj)[src].push_back(dest);
@@ -88,7 +90,7 @@ void print_BC(vector<float> BC, int V, string file_name) {
 }
 
 //Method for calculating the Betweenness Centrality
-vector<float> calculate_centrality(int V, vector<int> adj[],
+vector<float> calculate_centrality(int V, map<int, vector<int> > adj,
 		vector<int> predecessor[], vector<int> sigma, vector<int> distance,
 		vector<float> delta, stack<int> st, map<int, vector<int> > map,
 		queue<int> q, vector<float> CB, int** shortest_path_dist) {
@@ -131,8 +133,14 @@ vector<float> calculate_centrality(int V, vector<int> adj[],
 //			cout<<"q vertex : "<<source_vertex<<"\n";
 			q.pop();
 			st.push(vertex);
+//			for (const auto& pair : adj) {
+//					std::cout << "key: " << pair.first << "  value: [  ";
+//					for (int d : pair.second)
+//						std::cout << d << "  ";
+//					std::cout << "]\n";
+//				}
 			for (auto &i : adj[vertex]) {
-//				cout << "Vertex : " << vertex << " neighbor :" << i << endl;
+				cout << "Vertex : " << vertex << " neighbor :" << i << endl;
 				if (distance[i] < 0) {
 					q.push(i);
 					distance[i] = distance[vertex] + 1;
@@ -281,7 +289,7 @@ int main(int argc, char* argv[]) {
 
 //	Declarations
 	int V = 100;
-	vector<int> adj[V];
+//	vector<int> adj[V];
 	vector<int> predecessor[V];
 	vector<int> vector_sigma(V);
 	vector<int> vector_distance(V);
@@ -315,9 +323,9 @@ int main(int argc, char* argv[]) {
 //	cout << "before going in edge add\n";
 //	Reading from the file
 //	try{
-	cout << "reading teh file" << endl;
+//	cout << "reading teh file" << endl;
 	read_file(input_filename, V);
-	cout << "reading teh file finished" << endl;
+//	cout << "reading teh file finished" << endl;
 	adj_print();
 	cout << "Calculation of Betweenness Centrality Started" << endl;
 	t1 = clock();
