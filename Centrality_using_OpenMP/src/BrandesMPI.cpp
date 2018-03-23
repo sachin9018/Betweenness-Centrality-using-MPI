@@ -1,7 +1,7 @@
 //============================================================================================
 // Name        : test.cpp
-// Author      : Kartik
-//				 Snehal Gandham
+// Author      : Vijaya Karthik Kadirvel (58968746)
+//				 Snehal Srinivas Gandham (79007757)
 // Version     : 1.0
 // Course      : High Performance Computing
 // Description : Betweenness Centrality calculation using OpenMP.
@@ -24,6 +24,7 @@
 #include <sstream>
 #include <sys/time.h>
 #include <mpi.h>
+#include <chrono>
 
 using namespace std;
 
@@ -36,41 +37,36 @@ struct neig {
 };
 
 typedef vector<vector<neig> > adjacency_list;
+set<int> set_vertices_all;
+float shortest_path_func(int src, int n, stack<int> &visitStack,
+		vector<int> &sigma, list<int> *pred, adjacency_list &adjList) {
 
-float shortest_path_func(int src, int n, stack<int> &visitStack, vector<int> &sigma,
-		list<int> *pred, adjacency_list &adjList) {
-	// Closeness counter.
 	float closeness = 0;
 
-	// Vector that holds the distances from the source.
 	vector<int> dist;
 	dist.resize(n, -1);
 	dist[src] = 0;
 
-	// Queue used for the Bfs algorithm.
 	queue<int> visitQueue;
 	visitQueue.push(src);
 
-	// While there are still elements in the queue.
 	while (!visitQueue.empty()) {
-		// Pop the first.
+
 		int v = visitQueue.front();
 		visitQueue.pop();
 		visitStack.push(v);
 
-		// Closeness part aggregation.
 		closeness += dist[v];
 
-		// Check the neighbors w of v.
 		for (vector<neig>::iterator it = adjList[v].begin();
 				it != adjList[v].end(); it++) {
 			int w = it->target;
-			// Node w found for the first time?
+
 			if (dist[w] < 0) {
 				visitQueue.push(w);
 				dist[w] = dist[v] + 1;
 			}
-			// Is the shortest path to w via u?
+
 			if (dist[w] == dist[v] + 1) {
 				pred[w].push_back(v);
 				sigma[w] += sigma[v];
@@ -78,7 +74,7 @@ float shortest_path_func(int src, int n, stack<int> &visitStack, vector<int> &si
 		}
 
 	}
-	// Closeness part inversion.
+
 	if (closeness != 0) {
 		return 1.0 / closeness;
 	} else {
@@ -86,36 +82,126 @@ float shortest_path_func(int src, int n, stack<int> &visitStack, vector<int> &si
 	}
 }
 
-
-void time_print(int n, int e, double t) {
+void time_print(int n, int e, float t) {
 	ofstream out;
-	out.open("parallel_code_run.txt");
+	out.open("parallel_run_time_BC.txt", std::ios::app);
 
-	cout << "\nParallel Run Time for "<< n <<" Nodes and " << e<< " Edges  is : "<< t;
-	out << "\nParallel Run Time for "<< n <<" Nodes and " << e<< " Edges  is : "<< t;
+	cout << "\nParallel Run Time for " << n << " Nodes and " << e
+			<< " Edges  is : " << t << " ms ";
+	out << "\nParallel Run Time for " << n << " Nodes and " << e
+			<< " Edges  is : " << t;
 
 	out.close();
 }
+bool split(const string &s, int V, adjacency_list &adjList, char* input) {
+	stringstream ss(s);
+	string buf;
 
-void readGraph(int n, int &e, adjacency_list &adjList,
-		char* input) {
+	bool var_bool = true;
+	long src = 0, dest = 0;
+	while (ss >> buf) {
 
-	e = 0;
+		if (var_bool) {
+			src = stol(buf);
+			var_bool = false;
+		} else {
+			dest = stol(buf);
+			var_bool = true;
+		}
+
+	}
+//	cout << src << " : " << dest;
+	if (src <= V && dest <= V)
+		adjList[src].push_back(neig(dest, 1));
+	if (src > V)
+		return false;
+//	else return false;
+
+	return true;
+}
+
+// Method read file
+void read_file(long n, adjacency_list &adjList, char* input) {
+
+	string line;
+	ifstream myfile(input);
+	stringstream ss(line);
+	adjList.reserve(500000);
+//	cout << input << endl;
+	int count = 0;
+	int read_count = 1;
+	if (myfile.is_open()) {
+		while (getline(myfile, line)) {
+//			cout << line << endl;
+			if (line.find("#") != string::npos)
+				continue;
+			if (line.find(":") != string::npos)
+				continue;
+
+			stringstream ss(line);
+			string buf;
+
+			bool var_bool = true;
+			int src = 0, dest = 0;
+			while (ss >> buf) {
+
+				if (var_bool) {
+					src = stoi(buf);
+					var_bool = false;
+				} else {
+					dest = stoi(buf);
+					var_bool = true;
+				}
+
+			}
+
+			if (src < n && dest < n){
+				adjList[src].push_back(neig(dest, 1));
+//				cout << src << " : " << dest<<endl;
+			}
+			else {
+				count++;
+//			if (read_count % 100000 == 0)
+//				cout << read_count << " read . ";
+
+				if (count == 20)
+					myfile.close();
+			}
+		}
+		myfile.close();
+	} else
+		cout << "Unable to open File_100 file" << endl;
+}
+void readGraph(int n, int &e, adjacency_list &adjList, char* input) {
+
+//	e = 0;
 
 	char * line = NULL;
 	size_t len = 0;
 	FILE * fp = fopen(input, "r");
-	adjList.reserve(200);
+	adjList.reserve(100000);
 
-
-	int start, end, weight;
+	int start, end, weight, count = 0;
 
 	while (getline(&line, &len, fp) != -1) {
-		e += 1;
+//		e += 1;
+
 		start = atoi(strtok(line, " "));
 		end = atoi(strtok(NULL, " "));
+//		cout << start << " : " << end << endl;
 
-		adjList[start].push_back(neig(end, 1));
+		if (start < n && end < e) {
+
+			set_vertices_all.insert(start);
+			set_vertices_all.insert(end);
+			adjList[start].push_back(neig(end, 1));
+		} else {
+			if (start > n)
+				count++;
+
+		}
+		if (count >= 20)
+			fclose(fp);
 //        adjList[end].push_back(neighbor(start, weight));
 	}
 
@@ -123,35 +209,17 @@ void readGraph(int n, int &e, adjacency_list &adjList,
 		free(line);
 	}
 
-	// Print statistics after reading.
-
 }
 
-// Clears the variables or re-initializes to 0, so that they are ready for the next loop.
-void resetVariables(int src, int n, list<int> *pred, vector<int> &sigma,
-		vector<float> &delta) {
-	for (int i = 0; i < n; i++) {
-		pred[i].clear();
-	}
-
-	sigma.clear();
-	sigma.resize(n, 0);
-	sigma[src] = 1;
-
-	delta.clear();
-	delta.resize(n, 0);
-}
-
-// Prints Node Betweenness Centrality.
-void betweenness_centrality_print(int n, vector<float> nodeBetweenness) {
+void betweenness_centrality_print(int n, vector<float> nodeBetweenness, string bc_file) {
 
 	ofstream out;
-	out.open("parallel_betweenness_centrality.txt");
-	cout << endl << "> Parallel Betweenness Centrality" << endl;
+	out.open(bc_file);
+//	cout << endl << "> Parallel Betweenness Centrality" << endl;
 	for (int i = 0; i < n; i++) {
 		//cout << "Node " << i << ": " << nodeBetweenness[i] / nrml << endl;
-		out << "Vertex " << i << ": "
-				<< nodeBetweenness[i] / ((n - 1) * (n - 2)) << endl;
+		out << "Vertex " << i << ": " <<nodeBetweenness[i]<<endl;
+//				<< nodeBetweenness[i] / ((n - 1) * (n - 2)) << endl;
 	}
 	out.close();
 }
@@ -164,14 +232,18 @@ int main(int argc, char* argv[]) {
 	int world_rank;
 	MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
 
-	int n=stoi(argv[2]), e;
+	int n = stoi(argv[3]), e = stoi(argv[3]);
 	adjacency_list adjList;
 
 	vector<float> nodeBetweenness;
 	vector<float> nodeBetweenness_g;
 	vector<float> closeness;
-
-	readGraph(n,e, adjList, argv[1]);
+	cout << endl << "Parallel Betweenness Centrality" << endl<<endl;
+//	cout << "Before going into read file";
+	cout<<"Reading of file started"<<endl;
+	read_file(n,adjList, argv[1]);
+	cout<<"reading the file finished"<<endl;
+//	readGraph(n, e, adjList, argv[1]);
 
 	nodeBetweenness.resize(n, 0);
 	nodeBetweenness_g.resize(n, 0);
@@ -180,10 +252,12 @@ int main(int argc, char* argv[]) {
 	list<int> pred[n];
 	vector<int> sigma;
 	vector<float> delta;
-	stack<int> visitStack;
-	MPI_Barrier (MPI_COMM_WORLD);
-	double t1, t2;
-	t1 = clock();
+	stack<int> visit_nodes;
+	MPI_Barrier(MPI_COMM_WORLD);
+	typedef std::chrono::high_resolution_clock Clock;
+	typedef std::chrono::milliseconds milliseconds;
+	cout<<"Calculation of Betweenness Centrality Started"<<endl;
+	Clock::time_point t0 = Clock::now();
 
 	int begin_vertex = n / world_size * world_rank;
 	int end_vertex = n / world_size * (world_rank + 1);
@@ -193,13 +267,23 @@ int main(int argc, char* argv[]) {
 	for (int src = begin_vertex; src < end_vertex; src++) {
 
 		if (src < n) {
-			resetVariables(src, n, pred, sigma, delta);
+			for (int i = 0; i < n; i++) {
+				pred[i].clear();
+			}
 
-			closeness[src] = shortest_path_func(src, n, visitStack, sigma, pred, adjList);
+			sigma.clear();
+			sigma.resize(n, 0);
+			sigma[src] = 1;
 
-			while (!visitStack.empty()) {
-				int w = visitStack.top();
-				visitStack.pop();
+			delta.clear();
+			delta.resize(n, 0);
+
+			closeness[src] = shortest_path_func(src, n, visit_nodes, sigma,
+					pred, adjList);
+
+			while (!visit_nodes.empty()) {
+				int w = visit_nodes.top();
+				visit_nodes.pop();
 
 				for (list<int>::iterator it = pred[w].begin();
 						it != pred[w].end(); it++) {
@@ -219,21 +303,24 @@ int main(int argc, char* argv[]) {
 	}
 	MPI_Barrier(MPI_COMM_WORLD);
 	MPI_Reduce(&nodeBetweenness.front(), &nodeBetweenness_g.front(), n,
-			MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
-	t2 = clock();
+	MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
+	Clock::time_point t3 = Clock::now();
+		milliseconds ms = std::chrono::duration_cast<milliseconds>(t3 - t0);
+		cout<<"Calculation of Betweenness Centrality ended"<<endl;
 
 	MPI_Barrier(MPI_COMM_WORLD);
 	if (world_rank == 0) {
-		double t = double(t2 - t1) / CLOCKS_PER_SEC;
+//		double t = double((t2 - t1)*100) / CLOCKS_PER_SEC;
 
-		time_print(n, e, t);
+		time_print(n, e, ms.count());
 
-		betweenness_centrality_print(n, nodeBetweenness_g);
+		betweenness_centrality_print(n, nodeBetweenness_g, argv[2]);
 
-		cout << "\n";
-		cout << "Time Taken : " << t;
-		cout << "\n";
+//		cout << "\n";
+//		cout << "Time Taken : " << ms.count();
+//		cout << "\n";
 	}
 	MPI_Barrier(MPI_COMM_WORLD);
+	MPI_Finalize();
 	return 0;
 }
