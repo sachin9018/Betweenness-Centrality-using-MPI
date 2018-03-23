@@ -150,16 +150,15 @@ bool split(string s, int V, adjacency_list &adjList) {
 	return true;
 }
 // Reads an input file and fills up the adjacency list as well as the edges.
-void readGraph(int &n, int &e, bool &isWeigthed, adjacency_list &adjList,
+void readGraph(int n, int &e, adjacency_list &adjList,
 		char* input) {
 
-	e = 0; // Total number of edges (for statistics).
-	isWeigthed = false;
+	e = 0;
 
 	char * line = NULL;
 	size_t len = 0;
 	FILE * fp = fopen(input, "r");
-	n = 200;
+//	n = 200;
 	adjList.reserve(200);
 
 	// Read the nodes and the edges, one by one, and fill up adjList and edgeBetweenness.
@@ -212,15 +211,14 @@ void betweenness_centrality_print(int n, vector<float> nodeBetweenness) {
 }
 
 int main(int argc, char* argv[]) {
-	//====================
+
 	MPI_Init(NULL, NULL);
 	int world_size;
 	MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 	int world_rank;
 	MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
-	//====================
-	int n, e; // Number of nodes
-	bool isWeigthed; // Weighted graph check.
+
+	int n=stoi(argv[2]), e; // Number of nodes
 	adjacency_list adjList; // Adjacency list.
 
 	// Centrality measures.
@@ -229,7 +227,7 @@ int main(int argc, char* argv[]) {
 	vector<float> nodeBetweenness_g;
 	vector<float> closeness;
 	// Input is read, and values are set to all the arguments.
-	readGraph(n, e, isWeigthed, adjList, argv[1]);
+	readGraph(e, adjList, argv[1]);
 //    if(world_rank==0) printInputStats(false, n, e);
 	nodeBetweenness.resize(n, 0);
 	nodeBetweenness_g.resize(n, 0);
