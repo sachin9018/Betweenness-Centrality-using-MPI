@@ -104,123 +104,84 @@ string getEdgeTag(int n1, int n2) {
     return os.str();
 }
 
+//// Prompts the user to type an input filename and returns the file pointer.
+//FILE * readPrompt() {
+//    FILE * fp;
+//
+//    // Append .net if the user did not provide it.
+//
+//    // Open the file and return fp, if it exists, otherwise exit with error.
+//    fp = fopen("fb.net", "r");
+//    if (fp == NULL) {
+//        cout << "File '" << "' not found.";
+//        exit(EXIT_FAILURE);
+//    } else {
+//        return fp;
+//    }
+//}
+
 // Prints input file statistics just after input has finished.
-void printInputStats(bool isWeigthed, int n, int e) {
+void printInputStats(bool isWeigthed, int n, int e, double t, string runtime_file) {
     ofstream out;
-    out.open ("out_graph_stats.txt");
-    cout << "\n==================="
-            << "\nINPUT GRAPH STATS"
-            << "\n>Weighted: " << boolalpha << bool(isWeigthed)
-            << "\n>#ofNodes: " << n
-            << "\n>#ofEdges: " << e
-            << "\n===================\n\n";
+    out.open (runtime_file);
+//    cout << "\n==================="
+//            << "\nINPUT GRAPH STATS"
+//            << "\n>Weighted: " << boolalpha << bool(isWeigthed)
+//            << "\n>#ofNodes: " << n
+//            << "\n>#ofEdges: " << e
+//            << "\n===================\n\n"
+//    			<< "\nTime :"<<t;
     out << "Weighted: " << boolalpha << bool(isWeigthed)
             << "\n>#ofNodes: " << n
             << "\n>#ofEdges: " << e;
+    			<< "\nTime :"<<t;
     out.close();
 }
 
-bool split(const string &s, int V) {
-	stringstream ss(s);
-	string buf;
-
-	bool var_bool = true;
-	long src = 0, dest = 0;
-	while (ss >> buf) {
-
-		if (var_bool) {
-			src = stol(buf);
-			var_bool = false;
-		} else {
-			dest = stol(buf);
-			var_bool = true;
-		}
-
-	}
-
-	if (src <= V && dest <= V)
-		 adjList[src].push_back(neighbor(dest, 1));
-//		        adjList[dest].push_back(neighbor(start, 1));
-	if (src > V)
-		return false;
-//	else return false;
-
-	return true;
-}
-
-void read_file(string path, long V) {
-
-	string line;
-	ifstream myfile(path);
-	stringstream ss(line);
-
-	int count = 0;
-	int read_count = 1;
-	if (myfile.is_open()) {
-		while (getline(myfile, line)) {
-			if (line.find("#") != string::npos)
-				continue;
-			if (line.find(":") != string::npos)
-				continue;
-
-			bool var = split(line, V);
-			read_count++;
-			if (read_count % 100000 == 0)
-				cout << read_count << " read . ";
-			if (!var)
-				count++;
-			if (count == 20)
-				myfile.close();
-
-		}
-		myfile.close();
-	} else
-		cout << "Unable to open File_100 file" << endl;
-}
-
 // Reads an input file and fills up the adjacency list as well as the edges.
-void readGraph(int &n,int &e, adjacency_list &adjList) {
+void readGraph(int &n,int &e, bool &isWeigthed, adjacency_list &adjList, char* input_filename) {
 
-//    e = 0; // Total number of edges (for statistics).
-//
-//
-//    char * line = NULL;
-//    size_t len = 0;
-//    FILE * fp = argv[1];
-//
-//    // Find n, the total number of nodes.
-//    if (getline(&line, &len, fp) != -1) {
-//                strtok(line, " ");
-//            n = atoi(strtok(NULL, " "));
-//
-//    }
-//
-//    // Reserve n space for adjacency list. If it fails, n was not parsed.
-//    if (n) {
-//        adjList.reserve(n);
-//    } else {
-//        cout << "Malformed input. Number of nodes undefined.";
-//        exit(EXIT_FAILURE);
-//    }
-//    cout<<"debug 1\n";
+    e = 0; // Total number of edges (for statistics).
+    isWeigthed = false;
+
+    char * line = NULL;
+    size_t len = 0;
+    FILE * fp;
+    fp=fopen(input_filename,"r");
+
+    // Find n, the total number of nodes.
+    if (getline(&line, &len, fp) != -1) {
+                strtok(line, " ");
+            n = atoi(strtok(NULL, " "));
+
+    }
+
+    // Reserve n space for adjacency list. If it fails, n was not parsed.
+    if (n) {
+        adjList.reserve(n);
+    } else {
+        cout << "Malformed input. Number of nodes undefined.";
+        exit(EXIT_FAILURE);
+    }
+    cout<<"debug 1\n";
     
-//    // Read the nodes and the edges, one by one, and fill up adjList and edgeBetweenness.
-//    int start, end, weight;
-//    while (getline(&line, &len, fp) != -1) {
-//        e += 1;
-//        start = atoi(strtok(line, " "));
-//        end = atoi(strtok(NULL, " "));
-//        weight = 1;//atoi(strtok(NULL, " "));
-//        // Check if the graph is weighted. If w<=0, the input is malformed
-//        if (weight > 1) {
-//            isWeigthed = true;
-//        } else if(weight<=0) {
-//            cout << "Malformed input. Edge w weight=0.";
-//            exit(EXIT_FAILURE);
-//        }
+    // Read the nodes and the edges, one by one, and fill up adjList and edgeBetweenness.
+    int start, end, weight;
+    while (getline(&line, &len, fp) != -1) {
+        e += 1;
+        start = atoi(strtok(line, " "));
+        end = atoi(strtok(NULL, " "));
+        weight = 1;//atoi(strtok(NULL, " "));
+        // Check if the graph is weighted. If w<=0, the input is malformed
+        if (weight > 1) {
+            isWeigthed = true;
+        } else if(weight<=0) {
+            cout << "Malformed input. Edge w weight=0.";
+            exit(EXIT_FAILURE);
+        }
 
         adjList[start].push_back(neighbor(end, weight));
-        adjList[end].push_back(neighbor(start, weight));
+//        adjList[end].push_back(neighbor(start, weight));
     }
 
     if (line) {
@@ -245,30 +206,30 @@ void resetVariables(int src, int n, list<int> *pred, vector<int> &sigma, vector<
     delta.resize(n, 0);
 }
 
-// Prints Closeness Centrality.
-void printCloseness( int n, vector<float> closeness, bool normalize) {
-    float nrml = 1;
-    if (normalize) {
-        nrml = 1.0/(n - 1);
-    } 
-    ofstream out;
-    out.open ("out_closeness.txt");
-    //cout << "> Closeness Centrality" << endl;    
-    for (int i = 0; i < n; i++) {
-        //cout << "Node " << i << ": " << closeness[i] / nrml << endl;
-        out << "Node " << i << ": " << closeness[i] / nrml << endl;
-    }
-    out.close();
-}
+//// Prints Closeness Centrality.
+//void printCloseness( int n, vector<float> closeness, bool normalize) {
+//    float nrml = 1;
+//    if (normalize) {
+//        nrml = 1.0/(n - 1);
+//    }
+//    ofstream out;
+//    out.open ("out_closeness.txt");
+//    //cout << "> Closeness Centrality" << endl;
+//    for (int i = 0; i < n; i++) {
+//        //cout << "Node " << i << ": " << closeness[i] / nrml << endl;
+//        out << "Node " << i << ": " << closeness[i] / nrml << endl;
+//    }
+//    out.close();
+//}
 
 // Prints Node Betweenness Centrality.
-void printNodeBetweenness( int n, vector<float> nodeBetweenness, bool normalize) {
+void printNodeBetweenness( int n, vector<float> nodeBetweenness, bool normalize, string output_filename) {
     float nrml = 1;
     if (normalize) {
         nrml = (n - 1)*(n - 2);
     }
     ofstream out;
-    out.open ("out_node_betweenness.txt");
+    out.open (output_filename);
     cout << endl << "> Node Betweenness Centrality" << endl;
     for (int i = 0; i < n; i++) {
         //cout << "Node " << i << ": " << nodeBetweenness[i] / nrml << endl;
@@ -277,19 +238,23 @@ void printNodeBetweenness( int n, vector<float> nodeBetweenness, bool normalize)
     out.close();
 }
 
-int main(void) {
+int main(int argc, char* argv[]) {
+
+		char* input_filename = argv[1];
+		cout<<"read from : "<< input_filename;
+		string output_filename = argv[2];
+		string runtime_file = argv[3];
+		int V = stoi(argv[4]);
 
     MPI_Init(NULL,NULL);
-
-    int var_size_mpi;
-    MPI_Comm_size(MPI_COMM_WORLD,&var_size_mpi);
-
+    int world_size;
+    MPI_Comm_size(MPI_COMM_WORLD,&world_size);
     int world_rank;
     MPI_Comm_rank(MPI_COMM_WORLD,&world_rank);
-
-    int number_node,number_edge;
-
-
+    //====================
+    int n,e; // Number of nodes
+    bool isWeigthed; // Weighted graph check.
+    adjacency_list adjList; // Adjacency list.
 
     // Centrality measures.
   //  map<string, float> edgeBetweenness;
@@ -297,30 +262,31 @@ int main(void) {
     vector<float> nodeBetweenness_g;
     vector<float> closeness;
     // Input is read, and values are set to all the arguments.
-    readGraph(number_node,number_edge, adjList);
-    if(world_rank==0) printInputStats(false, number_node, number_edge);
-    nodeBetweenness.resize(number_node, 0);
-    nodeBetweenness_g.resize(number_node,0);
-    closeness.resize(number_node, 0);
+    readGraph(n,e, isWeigthed, adjList, input_filename);
 
-    list<int> pred[number_node]; // List of predecessors of node v.
+
+    nodeBetweenness.resize(n, 0);
+    nodeBetweenness_g.resize(n,0);
+    closeness.resize(n, 0);
+
+    list<int> pred[n]; // List of predecessors of node v.
     vector<int> sigma;
     vector<float> delta;
     stack<int> visitStack; // Stack that holds the inverse order of visited nodes.
     MPI_Barrier(MPI_COMM_WORLD);
     clkbegin = rtclock();
     // For each node of the graph.
-    int begin_vertex = number_node/var_size_mpi * world_rank;
-    int end_vertex = number_node/var_size_mpi * (world_rank + 1);
-    if(world_rank == var_size_mpi-1){
-        end_vertex = number_node;
+    int begin_vertex = n/world_size * world_rank;
+    int end_vertex = n/world_size * (world_rank + 1);
+    if(world_rank == world_size-1){
+        end_vertex = n;
     }
     for (int src = begin_vertex; src < end_vertex; src++) { 
         // Prepare the variables for the next loop.
-        if(src < number_node){
-            resetVariables(src, number_node, pred, sigma, delta);
+        if(src < n){
+            resetVariables(src, n, pred, sigma, delta);
             //if(world_rank==1)cout<<"my rank : "<<world_rank<<" debug 1: "<<n<<" "<<src<<endl;
-            closeness[src] = bfs_SSSP(src, number_node, visitStack, sigma, pred, adjList);
+            closeness[src] = bfs_SSSP(src, n, visitStack, sigma, pred, adjList);
 
             // Get the inverse order of visited nodes.
             while (!visitStack.empty()) {
@@ -343,19 +309,14 @@ int main(void) {
         //cout<<"my rank "<<world_rank<<endl;
     }
     MPI_Barrier(MPI_COMM_WORLD);
-    MPI_Reduce( &nodeBetweenness.front(), &nodeBetweenness_g.front(), number_node, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
+    MPI_Reduce( &nodeBetweenness.front(), &nodeBetweenness_g.front(), n, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
     clkend = rtclock();
     MPI_Barrier(MPI_COMM_WORLD);
+
     if(world_rank == 0){
         t = clkend-clkbegin;
-        
-        // Printing output.
-        printCloseness(number_node, closeness, true);
-        printNodeBetweenness(number_node, nodeBetweenness_g, true);
-        //
-        cout << "\n" ;
-        cout << "Time Taken : " << t;
-        cout << "\n";
+        printInputStats(false, n, e,t,runtime_file);
+        printNodeBetweenness(n, nodeBetweenness_g, true, output_filename);
     }
     MPI_Barrier(MPI_COMM_WORLD);
     return 0;
