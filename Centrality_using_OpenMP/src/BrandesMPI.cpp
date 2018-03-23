@@ -27,19 +27,6 @@
 
 using namespace std;
 
-//double clkbegin, clkend, t;
-//
-//double rtclock(void) {
-//	struct timezone Tzp;
-//	struct timeval Tp;
-//	int stat;
-//	stat = gettimeofday(&Tp, &Tzp);
-//	if (stat != 0)
-//		printf("Error return from gettimeofday: %d", stat);
-//	return (Tp.tv_sec + Tp.tv_usec * 1.0e-6);
-//}
-
-
 struct neig {
 	int target;
 	int weight;
@@ -50,7 +37,7 @@ struct neig {
 
 typedef vector<vector<neig> > adjacency_list;
 
-float bfs_SSSP(int src, int n, stack<int> &visitStack, vector<int> &sigma,
+float shortest_path_func(int src, int n, stack<int> &visitStack, vector<int> &sigma,
 		list<int> *pred, adjacency_list &adjList) {
 	// Closeness counter.
 	float closeness = 0;
@@ -99,17 +86,6 @@ float bfs_SSSP(int src, int n, stack<int> &visitStack, vector<int> &sigma,
 	}
 }
 
-// Given two node indices, this function returns a string representation with
-// the smallest index first, a dash, and the second index after.
-string getEdgeTag(int n1, int n2) {
-	ostringstream os;
-	if (n1 <= n2) {
-		os << n1 << "-" << n2;
-	} else {
-		os << n2 << "-" << n1;
-	}
-	return os.str();
-}
 
 void time_print(int n, int e, double t) {
 	ofstream out;
@@ -121,33 +97,6 @@ void time_print(int n, int e, double t) {
 	out.close();
 }
 
-bool split(string s, int V, adjacency_list &adjList) {
-	stringstream ss(s);
-	string buf;
-
-	bool var_bool = true;
-	long src = 0, dest = 0;
-	while (ss >> buf) {
-
-		if (var_bool) {
-			src = stol(buf);
-			var_bool = false;
-		} else {
-			dest = stol(buf);
-			var_bool = true;
-		}
-
-	}
-
-	if (src <= V && dest <= V)
-		adjList[src].push_back(neig(dest, 1));
-	if (src > V)
-		return false;
-//	else return false;
-
-	return true;
-}
-// Reads an input file and fills up the adjacency list as well as the edges.
 void readGraph(int n, int &e, adjacency_list &adjList,
 		char* input) {
 
@@ -156,10 +105,9 @@ void readGraph(int n, int &e, adjacency_list &adjList,
 	char * line = NULL;
 	size_t len = 0;
 	FILE * fp = fopen(input, "r");
-//	n = 200;
 	adjList.reserve(200);
 
-	// Read the nodes and the edges, one by one, and fill up adjList and edgeBetweenness.
+
 	int start, end, weight;
 
 	while (getline(&line, &len, fp) != -1) {
@@ -216,25 +164,23 @@ int main(int argc, char* argv[]) {
 	int world_rank;
 	MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
 
-	int n=stoi(argv[2]), e; // Number of nodes
-	adjacency_list adjList; // Adjacency list.
+	int n=stoi(argv[2]), e;
+	adjacency_list adjList;
 
-	// Centrality measures.
-	//  map<string, float> edgeBetweenness;
 	vector<float> nodeBetweenness;
 	vector<float> nodeBetweenness_g;
 	vector<float> closeness;
-	// Input is read, and values are set to all the arguments.
-	readGraph(e, adjList, argv[1]);
-//    if(world_rank==0) printInputStats(false, n, e);
+
+	readGraph(n,e, adjList, argv[1]);
+
 	nodeBetweenness.resize(n, 0);
 	nodeBetweenness_g.resize(n, 0);
 	closeness.resize(n, 0);
 
-	list<int> pred[n]; // List of predecessors of node v.
+	list<int> pred[n];
 	vector<int> sigma;
 	vector<float> delta;
-	stack<int> visitStack; // Stack that holds the inverse order of visited nodes.
+	stack<int> visitStack;
 	MPI_Barrier (MPI_COMM_WORLD);
 	double t1, t2;
 	t1 = clock();
@@ -249,7 +195,7 @@ int main(int argc, char* argv[]) {
 		if (src < n) {
 			resetVariables(src, n, pred, sigma, delta);
 
-			closeness[src] = bfs_SSSP(src, n, visitStack, sigma, pred, adjList);
+			closeness[src] = shortest_path_func(src, n, visitStack, sigma, pred, adjList);
 
 			while (!visitStack.empty()) {
 				int w = visitStack.top();
