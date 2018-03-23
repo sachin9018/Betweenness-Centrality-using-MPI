@@ -48,7 +48,7 @@ typedef vector<vector<neighbor> > adjacency_list;
 float bfs_SSSP(int src, int n, stack<int> &visitStack, vector<int> &sigma, list<int> *pred, adjacency_list &adjList) {
     // Closeness counter.
     float closeness = 0;
-    
+
     // Vector that holds the distances from the source.
     vector<int> dist;
     dist.resize(n, -1);
@@ -57,7 +57,7 @@ float bfs_SSSP(int src, int n, stack<int> &visitStack, vector<int> &sigma, list<
     // Queue used for the Bfs algorithm.
     queue<int> visitQueue;
     visitQueue.push(src);
-    
+
     // While there are still elements in the queue.
     while (!visitQueue.empty()) {
         // Pop the first.
@@ -67,7 +67,7 @@ float bfs_SSSP(int src, int n, stack<int> &visitStack, vector<int> &sigma, list<
 
         // Closeness part aggregation.
         closeness += dist[v];
-        
+
         // Check the neighbors w of v.
         for (vector<neighbor>::iterator it = adjList[v].begin(); it != adjList[v].end(); it++) {
             int w = it->target;
@@ -83,7 +83,7 @@ float bfs_SSSP(int src, int n, stack<int> &visitStack, vector<int> &sigma, list<
             }
         }
 
-    }    
+    }
     // Closeness part inversion.
     if (closeness!=0) {
         return 1.0 / closeness;
@@ -104,42 +104,65 @@ string getEdgeTag(int n1, int n2) {
     return os.str();
 }
 
-//// Prompts the user to type an input filename and returns the file pointer.
-//FILE * readPrompt() {
-//    FILE * fp;
-//
-//    // Append .net if the user did not provide it.
-//
-//    // Open the file and return fp, if it exists, otherwise exit with error.
-//    fp = fopen("fb.net", "r");
-//    if (fp == NULL) {
-//        cout << "File '" << "' not found.";
-//        exit(EXIT_FAILURE);
-//    } else {
-//        return fp;
-//    }
-//}
+// Prompts the user to type an input filename and returns the file pointer.
+FILE * readPrompt() {
+    FILE * fp;
+
+    // Append .net if the user did not provide it.
+
+    // Open the file and return fp, if it exists, otherwise exit with error.
+    fp = fopen("fb.net", "r");
+    if (fp == NULL) {
+        cout << "File '" << "' not found.";
+        exit(EXIT_FAILURE);
+    } else {
+        return fp;
+    }
+}
 
 // Prints input file statistics just after input has finished.
-void printInputStats(bool isWeigthed, int n, int e, double t, string runtime_file) {
+void printInputStats(bool isWeigthed, int n, int e) {
     ofstream out;
-    out.open (runtime_file);
-//    cout << "\n==================="
-//            << "\nINPUT GRAPH STATS"
-//            << "\n>Weighted: " << boolalpha << bool(isWeigthed)
-//            << "\n>#ofNodes: " << n
-//            << "\n>#ofEdges: " << e
-//            << "\n===================\n\n"
-//    			<< "\nTime :"<<t;
+    out.open ("out_graph_stats.txt");
+    cout << "\n==================="
+            << "\nINPUT GRAPH STATS"
+            << "\n>Weighted: " << boolalpha << bool(isWeigthed)
+            << "\n>#ofNodes: " << n
+            << "\n>#ofEdges: " << e
+            << "\n===================\n\n";
     out << "Weighted: " << boolalpha << bool(isWeigthed)
             << "\n>#ofNodes: " << n
             << "\n>#ofEdges: " << e;
-    			<< "\nTime :"<<t;
     out.close();
 }
+bool split(string s, int V, adjacency_list &adjList,) {
+	stringstream ss(s);
+	string buf;
 
+	bool var_bool = true;
+	long src = 0, dest = 0;
+	while (ss >> buf) {
+
+		if (var_bool) {
+			src = stol(buf);
+			var_bool = false;
+		} else {
+			dest = stol(buf);
+			var_bool = true;
+		}
+
+	}
+
+	if (src <= V && dest <= V)
+		adjList[src].push_back(neighbor(dest, 1));
+	if (src > V)
+		return false;
+//	else return false;
+
+	return true;
+}
 // Reads an input file and fills up the adjacency list as well as the edges.
-void readGraph(int &n,int &e, bool &isWeigthed, adjacency_list &adjList, char* input_filename) {
+void readGraph(int &n,int &e, bool &isWeigthed, adjacency_list &adjList,char* input) {
 
     e = 0; // Total number of edges (for statistics).
     isWeigthed = false;
@@ -147,38 +170,34 @@ void readGraph(int &n,int &e, bool &isWeigthed, adjacency_list &adjList, char* i
     char * line = NULL;
     size_t len = 0;
     FILE * fp;
-    fp=fopen(input_filename,"r");
+    fp=fopen(input,"r");
+    n=200;
+    adjList.reserve(200);
+//    // Find n, the total number of nodes.
+//    if (getline(&line, &len, fp) != -1) {
+//                strtok(line, " ");
+//            n = atoi(strtok(NULL, " "));
+//
+//    }
+//
+//    // Reserve n space for adjacency list. If it fails, n was not parsed.
+//    if (n) {
+//        adjList.reserve(n);
+//    } else {
+//        cout << "Malformed input. Number of nodes undefined.";
+//        exit(EXIT_FAILURE);
+//    }
+//    cout<<"debug 1\n";
 
-    // Find n, the total number of nodes.
-    if (getline(&line, &len, fp) != -1) {
-                strtok(line, " ");
-            n = atoi(strtok(NULL, " "));
-
-    }
-
-    // Reserve n space for adjacency list. If it fails, n was not parsed.
-    if (n) {
-        adjList.reserve(n);
-    } else {
-        cout << "Malformed input. Number of nodes undefined.";
-        exit(EXIT_FAILURE);
-    }
-    cout<<"debug 1\n";
-    
     // Read the nodes and the edges, one by one, and fill up adjList and edgeBetweenness.
     int start, end, weight;
+
     while (getline(&line, &len, fp) != -1) {
         e += 1;
         start = atoi(strtok(line, " "));
         end = atoi(strtok(NULL, " "));
         weight = 1;//atoi(strtok(NULL, " "));
-        // Check if the graph is weighted. If w<=0, the input is malformed
-        if (weight > 1) {
-            isWeigthed = true;
-        } else if(weight<=0) {
-            cout << "Malformed input. Edge w weight=0.";
-            exit(EXIT_FAILURE);
-        }
+
 
         adjList[start].push_back(neighbor(end, weight));
 //        adjList[end].push_back(neighbor(start, weight));
@@ -187,9 +206,9 @@ void readGraph(int &n,int &e, bool &isWeigthed, adjacency_list &adjList, char* i
     if (line) {
         free(line);
     }
-    
+
     // Print statistics after reading.
-    
+
 }
 
 // Clears the variables or re-initializes to 0, so that they are ready for the next loop.
@@ -206,30 +225,30 @@ void resetVariables(int src, int n, list<int> *pred, vector<int> &sigma, vector<
     delta.resize(n, 0);
 }
 
-//// Prints Closeness Centrality.
-//void printCloseness( int n, vector<float> closeness, bool normalize) {
-//    float nrml = 1;
-//    if (normalize) {
-//        nrml = 1.0/(n - 1);
-//    }
-//    ofstream out;
-//    out.open ("out_closeness.txt");
-//    //cout << "> Closeness Centrality" << endl;
-//    for (int i = 0; i < n; i++) {
-//        //cout << "Node " << i << ": " << closeness[i] / nrml << endl;
-//        out << "Node " << i << ": " << closeness[i] / nrml << endl;
-//    }
-//    out.close();
-//}
+// Prints Closeness Centrality.
+void printCloseness( int n, vector<float> closeness, bool normalize) {
+    float nrml = 1;
+    if (normalize) {
+        nrml = 1.0/(n - 1);
+    }
+    ofstream out;
+    out.open ("out_closeness.txt");
+    //cout << "> Closeness Centrality" << endl;
+    for (int i = 0; i < n; i++) {
+        //cout << "Node " << i << ": " << closeness[i] / nrml << endl;
+        out << "Node " << i << ": " << closeness[i] / nrml << endl;
+    }
+    out.close();
+}
 
 // Prints Node Betweenness Centrality.
-void printNodeBetweenness( int n, vector<float> nodeBetweenness, bool normalize, string output_filename) {
+void printNodeBetweenness( int n, vector<float> nodeBetweenness, bool normalize) {
     float nrml = 1;
     if (normalize) {
         nrml = (n - 1)*(n - 2);
     }
     ofstream out;
-    out.open (output_filename);
+    out.open ("out_node_betweenness.txt");
     cout << endl << "> Node Betweenness Centrality" << endl;
     for (int i = 0; i < n; i++) {
         //cout << "Node " << i << ": " << nodeBetweenness[i] / nrml << endl;
@@ -239,13 +258,7 @@ void printNodeBetweenness( int n, vector<float> nodeBetweenness, bool normalize,
 }
 
 int main(int argc, char* argv[]) {
-
-		char* input_filename = argv[1];
-		cout<<"read from : "<< input_filename;
-		string output_filename = argv[2];
-		string runtime_file = argv[3];
-		int V = stoi(argv[4]);
-
+    //====================
     MPI_Init(NULL,NULL);
     int world_size;
     MPI_Comm_size(MPI_COMM_WORLD,&world_size);
@@ -262,9 +275,8 @@ int main(int argc, char* argv[]) {
     vector<float> nodeBetweenness_g;
     vector<float> closeness;
     // Input is read, and values are set to all the arguments.
-    readGraph(n,e, isWeigthed, adjList, input_filename);
-
-
+    readGraph(n,e, isWeigthed, adjList,argv[1]);
+    if(world_rank==0) printInputStats(false, n, e);
     nodeBetweenness.resize(n, 0);
     nodeBetweenness_g.resize(n,0);
     closeness.resize(n, 0);
@@ -281,7 +293,7 @@ int main(int argc, char* argv[]) {
     if(world_rank == world_size-1){
         end_vertex = n;
     }
-    for (int src = begin_vertex; src < end_vertex; src++) { 
+    for (int src = begin_vertex; src < end_vertex; src++) {
         // Prepare the variables for the next loop.
         if(src < n){
             resetVariables(src, n, pred, sigma, delta);
@@ -292,7 +304,7 @@ int main(int argc, char* argv[]) {
             while (!visitStack.empty()) {
                 int w = visitStack.top();
                 visitStack.pop();
-                
+
                 // For each predecessors of node w, do the math!
                 for (list<int>::iterator it = pred[w].begin(); it != pred[w].end(); it++) {
                     int v = *it;
@@ -312,11 +324,16 @@ int main(int argc, char* argv[]) {
     MPI_Reduce( &nodeBetweenness.front(), &nodeBetweenness_g.front(), n, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
     clkend = rtclock();
     MPI_Barrier(MPI_COMM_WORLD);
-
     if(world_rank == 0){
         t = clkend-clkbegin;
-        printInputStats(false, n, e,t,runtime_file);
-        printNodeBetweenness(n, nodeBetweenness_g, true, output_filename);
+
+        // Printing output.
+        printCloseness(n, closeness, true);
+        printNodeBetweenness(n, nodeBetweenness_g, true);
+        //
+        cout << "\n" ;
+        cout << "Time Taken : " << t;
+        cout << "\n";
     }
     MPI_Barrier(MPI_COMM_WORLD);
     return 0;
