@@ -121,21 +121,22 @@ FILE * readPrompt() {
 }
 
 // Prints input file statistics just after input has finished.
-void printInputStats(bool isWeigthed, int n, int e) {
+void printInputStats(int n, int e,double t) {
     ofstream out;
     out.open ("out_graph_stats.txt");
     cout << "\n==================="
             << "\nINPUT GRAPH STATS"
-            << "\n>Weighted: " << boolalpha << bool(isWeigthed)
             << "\n>#ofNodes: " << n
             << "\n>#ofEdges: " << e
+			<< " time : "<<t
             << "\n===================\n\n";
-    out << "Weighted: " << boolalpha << bool(isWeigthed)
-            << "\n>#ofNodes: " << n
-            << "\n>#ofEdges: " << e;
+    out <<  "\nBetweenness Centrality for "
+            << " Nodes: " << n
+            << " and Edges: " << e
+    			<< " is : " << t;
     out.close();
 }
-bool split(string s, int V, adjacency_list &adjList,) {
+bool split(string s, int V, adjacency_list &adjList) {
 	stringstream ss(s);
 	string buf;
 
@@ -169,25 +170,9 @@ void readGraph(int &n,int &e, bool &isWeigthed, adjacency_list &adjList,char* in
 
     char * line = NULL;
     size_t len = 0;
-    FILE * fp;
-    fp=fopen(input,"r");
+    FILE * fp=fopen(input,"r");
     n=200;
     adjList.reserve(200);
-//    // Find n, the total number of nodes.
-//    if (getline(&line, &len, fp) != -1) {
-//                strtok(line, " ");
-//            n = atoi(strtok(NULL, " "));
-//
-//    }
-//
-//    // Reserve n space for adjacency list. If it fails, n was not parsed.
-//    if (n) {
-//        adjList.reserve(n);
-//    } else {
-//        cout << "Malformed input. Number of nodes undefined.";
-//        exit(EXIT_FAILURE);
-//    }
-//    cout<<"debug 1\n";
 
     // Read the nodes and the edges, one by one, and fill up adjList and edgeBetweenness.
     int start, end, weight;
@@ -196,10 +181,9 @@ void readGraph(int &n,int &e, bool &isWeigthed, adjacency_list &adjList,char* in
         e += 1;
         start = atoi(strtok(line, " "));
         end = atoi(strtok(NULL, " "));
-        weight = 1;//atoi(strtok(NULL, " "));
 
 
-        adjList[start].push_back(neighbor(end, weight));
+        adjList[start].push_back(neighbor(end, 1));
 //        adjList[end].push_back(neighbor(start, weight));
     }
 
@@ -225,34 +209,15 @@ void resetVariables(int src, int n, list<int> *pred, vector<int> &sigma, vector<
     delta.resize(n, 0);
 }
 
-// Prints Closeness Centrality.
-void printCloseness( int n, vector<float> closeness, bool normalize) {
-    float nrml = 1;
-    if (normalize) {
-        nrml = 1.0/(n - 1);
-    }
-    ofstream out;
-    out.open ("out_closeness.txt");
-    //cout << "> Closeness Centrality" << endl;
-    for (int i = 0; i < n; i++) {
-        //cout << "Node " << i << ": " << closeness[i] / nrml << endl;
-        out << "Node " << i << ": " << closeness[i] / nrml << endl;
-    }
-    out.close();
-}
-
 // Prints Node Betweenness Centrality.
-void printNodeBetweenness( int n, vector<float> nodeBetweenness, bool normalize) {
-    float nrml = 1;
-    if (normalize) {
-        nrml = (n - 1)*(n - 2);
-    }
+void printNodeBetweenness( int n, vector<float> nodeBetweenness) {
+
     ofstream out;
-    out.open ("out_node_betweenness.txt");
-    cout << endl << "> Node Betweenness Centrality" << endl;
+    out.open ("parallel_betweenness_centrality.txt");
+    cout << endl << "> Parallel Betweenness Centrality" << endl;
     for (int i = 0; i < n; i++) {
         //cout << "Node " << i << ": " << nodeBetweenness[i] / nrml << endl;
-        out << "Node " << i << ": " << nodeBetweenness[i] / nrml << endl;
+        out << "Vertex " << i << ": " << nodeBetweenness[i] / ((n-1)*(n-2)) << endl;
     }
     out.close();
 }
@@ -276,7 +241,7 @@ int main(int argc, char* argv[]) {
     vector<float> closeness;
     // Input is read, and values are set to all the arguments.
     readGraph(n,e, isWeigthed, adjList,argv[1]);
-    if(world_rank==0) printInputStats(false, n, e);
+//    if(world_rank==0) printInputStats(false, n, e);
     nodeBetweenness.resize(n, 0);
     nodeBetweenness_g.resize(n,0);
     closeness.resize(n, 0);
@@ -326,10 +291,9 @@ int main(int argc, char* argv[]) {
     MPI_Barrier(MPI_COMM_WORLD);
     if(world_rank == 0){
         t = clkend-clkbegin;
-
+        printInputStats(n, e,t);
         // Printing output.
-        printCloseness(n, closeness, true);
-        printNodeBetweenness(n, nodeBetweenness_g, true);
+        printNodeBetweenness(n, nodeBetweenness_g);
         //
         cout << "\n" ;
         cout << "Time Taken : " << t;
