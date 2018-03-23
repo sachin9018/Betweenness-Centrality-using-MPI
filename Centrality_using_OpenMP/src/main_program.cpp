@@ -22,13 +22,14 @@
 #include <fstream>
 #include <string>
 #include <sstream>
+#include <omp.h>
 
 using namespace std;
 
 map<int, vector<int> > adj;
 map<int, float> BC;
 set<int> set_vertices_all;
-long edge_count=0;
+long edge_count = 0;
 
 //Method for forming the adjacency list
 void edge_add(int src, int dest) {
@@ -48,7 +49,7 @@ void adj_print() {
 		cout << "Vertex: " << pair.first << "  and its neighbors are : ";
 		for (int d : pair.second)
 			cout << d << "  ";
-		cout <<endl;
+		cout << endl;
 	}
 
 }
@@ -71,10 +72,11 @@ void print_BC(int V, string file_name) {
 void calculate_centrality(int V) { //	cout << "went in calculate centrality";
 
 	//	iterating through each vertex
-	int vertex_count=1;
-	for (auto source_vertex:set_vertices_all) {
+	int vertex_count = 1;
+	for (auto source_vertex : set_vertices_all) {
 		vertex_count++;
-		if(vertex_count%1000==0) cout<<source_vertex<<endl;
+		if (vertex_count % 1000 == 0)
+			cout << source_vertex << endl;
 		//		Begin of Initialization
 //		cout << "Vertex : " << source_vertex << endl;
 
@@ -84,11 +86,11 @@ void calculate_centrality(int V) { //	cout << "went in calculate centrality";
 		queue<int> q;
 		stack<int> st;
 		for (auto source_vertex_tmp : set_vertices_all) {
-					sigma[source_vertex_tmp] = 0;
-					distance[source_vertex_tmp] = -1;
-					delta[source_vertex_tmp] = 0;
+			sigma[source_vertex_tmp] = 0;
+			distance[source_vertex_tmp] = -1;
+			delta[source_vertex_tmp] = 0;
 
-				}
+		}
 
 		distance[source_vertex] = 0;
 		sigma[source_vertex] = 1;
@@ -110,32 +112,33 @@ void calculate_centrality(int V) { //	cout << "went in calculate centrality";
 				if (distance[i] == distance[vertex] + 1) {
 					sigma[i] = sigma[i] + sigma[vertex];
 
-						map_predecessor[i].insert(vertex);
-					}
+					map_predecessor[i].insert(vertex);
 				}
-			}
-
-
-		while (!st.empty()) {
-			int st_neigh = st.top();
-			st.pop();
-			for (auto &vertex_pred : map_predecessor[st_neigh]) {
-				//				cout << "neigh : " << st_neigh << " pred : " << vertex_pred
-				//						<< endl;
-
-				//				cout << "before:\n" << "delta[" << vertex_pred << "] : "
-				//						<< delta[vertex_pred];
-				float tmp_delta = delta[vertex_pred]
-						+ (((float) ((float) sigma[vertex_pred]
-								/ (float) sigma[st_neigh]))
-								* (1 + delta[st_neigh]));
-				delta[vertex_pred] += tmp_delta;
-
-				if (source_vertex != st_neigh)
-					BC[st_neigh] += delta[st_neigh];
 			}
 		}
 
+#pragma omp parallel shared(delta,BC)
+		{
+			while (!st.empty()) {
+				int st_neigh = st.top();
+				st.pop();
+				for (auto &vertex_pred : map_predecessor[st_neigh]) {
+					//				cout << "neigh : " << st_neigh << " pred : " << vertex_pred
+					//						<< endl;
+
+					//				cout << "before:\n" << "delta[" << vertex_pred << "] : "
+					//						<< delta[vertex_pred];
+					float tmp_delta = delta[vertex_pred]
+							+ (((float) ((float) sigma[vertex_pred]
+									/ (float) sigma[st_neigh]))
+									* (1 + delta[st_neigh]));
+					delta[vertex_pred] += tmp_delta;
+
+					if (source_vertex != st_neigh)
+						BC[st_neigh] += delta[st_neigh];
+				}
+			}
+		}
 	}
 
 }
@@ -160,7 +163,8 @@ bool split(const string &s, int V) {
 
 	if (src <= V && dest <= V)
 		edge_add(src, dest);
-	if(src>V) return false;
+	if (src > V)
+		return false;
 //	else return false;
 
 	return true;
@@ -177,8 +181,8 @@ void read_file(string path, long V) {
 
 //	  Reference - split functionality
 //	  http://ysonggit.github.io/coding/2014/12/16/split-a-string-using-c.html
-	int count=0;
-	int read_count=1;
+	int count = 0;
+	int read_count = 1;
 	if (myfile.is_open()) {
 		while (getline(myfile, line)) {
 //			cout << line << endl;
@@ -186,12 +190,14 @@ void read_file(string path, long V) {
 				continue;
 			if (line.find(":") != string::npos)
 				continue;
-			bool var  = split(line, V);
+			bool var = split(line, V);
 			read_count++;
-			if(read_count%100000==0) cout<<read_count<<" read . ";
-			if(!var) count++;
-			if(count==20) myfile.close();
-
+			if (read_count % 100000 == 0)
+				cout << read_count << " read . ";
+			if (!var)
+				count++;
+			if (count == 20)
+				myfile.close();
 
 		}
 		myfile.close();
@@ -212,7 +218,7 @@ int main(int argc, char* argv[]) {
 	clock_t t1, t2;
 
 //	Reading from the file
-	cout<<"Reading of file started"<<endl;
+	cout << "Reading of file started" << endl;
 	read_file(input_filename, V);
 	cout << "reading the file finished" << endl;
 //	adj_print();
@@ -227,7 +233,8 @@ int main(int argc, char* argv[]) {
 	double run_time = double(t2 - t1) / CLOCKS_PER_SEC;
 	cout << "Centrality calculated in : %f" << run_time << endl;
 	out.open(runtime_file, std::ios::app);
-	out << "\nRun Time for : " << set_vertices_all.size() << " : vertices  and "<< edge_count<<" edges is : ";
+	out << "\nRun Time for : " << set_vertices_all.size() << " : vertices  and "
+			<< edge_count << " edges is : ";
 	out << run_time;
 	out.close();
 
