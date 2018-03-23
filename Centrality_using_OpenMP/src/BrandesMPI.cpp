@@ -27,31 +27,29 @@
 
 using namespace std;
 
-double clkbegin, clkend, t;
+//double clkbegin, clkend, t;
+//
+//double rtclock(void) {
+//	struct timezone Tzp;
+//	struct timeval Tp;
+//	int stat;
+//	stat = gettimeofday(&Tp, &Tzp);
+//	if (stat != 0)
+//		printf("Error return from gettimeofday: %d", stat);
+//	return (Tp.tv_sec + Tp.tv_usec * 1.0e-6);
+//}
 
-double rtclock(void) {
-	struct timezone Tzp;
-	struct timeval Tp;
-	int stat;
-	stat = gettimeofday(&Tp, &Tzp);
-	if (stat != 0)
-		printf("Error return from gettimeofday: %d", stat);
-	return (Tp.tv_sec + Tp.tv_usec * 1.0e-6);
-}
 
-// A simple neighbor struct, consisting of the target neighbor and the edge weight.
-struct neighbor {
+struct neig {
 	int target;
 	int weight;
-	neighbor(int mTarget, int mWeight) :
+	neig(int mTarget, int mWeight) :
 			target(mTarget), weight(mWeight) {
 	}
 };
 
-// The new adjacency list type.
-typedef vector<vector<neighbor> > adjacency_list;
+typedef vector<vector<neig> > adjacency_list;
 
-// BFS algorithm is used to calculate all the single source shortest paths in a non weighted graph and the source's closeness.
 float bfs_SSSP(int src, int n, stack<int> &visitStack, vector<int> &sigma,
 		list<int> *pred, adjacency_list &adjList) {
 	// Closeness counter.
@@ -77,7 +75,7 @@ float bfs_SSSP(int src, int n, stack<int> &visitStack, vector<int> &sigma,
 		closeness += dist[v];
 
 		// Check the neighbors w of v.
-		for (vector<neighbor>::iterator it = adjList[v].begin();
+		for (vector<neig>::iterator it = adjList[v].begin();
 				it != adjList[v].end(); it++) {
 			int w = it->target;
 			// Node w found for the first time?
@@ -142,7 +140,7 @@ bool split(string s, int V, adjacency_list &adjList) {
 	}
 
 	if (src <= V && dest <= V)
-		adjList[src].push_back(neighbor(dest, 1));
+		adjList[src].push_back(neig(dest, 1));
 	if (src > V)
 		return false;
 //	else return false;
@@ -169,7 +167,7 @@ void readGraph(int n, int &e, adjacency_list &adjList,
 		start = atoi(strtok(line, " "));
 		end = atoi(strtok(NULL, " "));
 
-		adjList[start].push_back(neighbor(end, 1));
+		adjList[start].push_back(neig(end, 1));
 //        adjList[end].push_back(neighbor(start, weight));
 	}
 
@@ -239,27 +237,24 @@ int main(int argc, char* argv[]) {
 	stack<int> visitStack; // Stack that holds the inverse order of visited nodes.
 	MPI_Barrier (MPI_COMM_WORLD);
 	double t1, t2;
-	t1 = rtclock();
-//    clkbegin = rtclock();
-	// For each node of the graph.
+	t1 = clock();
+
 	int begin_vertex = n / world_size * world_rank;
 	int end_vertex = n / world_size * (world_rank + 1);
 	if (world_rank == world_size - 1) {
 		end_vertex = n;
 	}
 	for (int src = begin_vertex; src < end_vertex; src++) {
-		// Prepare the variables for the next loop.
+
 		if (src < n) {
 			resetVariables(src, n, pred, sigma, delta);
-			//if(world_rank==1)cout<<"my rank : "<<world_rank<<" debug 1: "<<n<<" "<<src<<endl;
+
 			closeness[src] = bfs_SSSP(src, n, visitStack, sigma, pred, adjList);
 
-			// Get the inverse order of visited nodes.
 			while (!visitStack.empty()) {
 				int w = visitStack.top();
 				visitStack.pop();
 
-				// For each predecessors of node w, do the math!
 				for (list<int>::iterator it = pred[w].begin();
 						it != pred[w].end(); it++) {
 					int v = *it;
@@ -268,7 +263,7 @@ int main(int argc, char* argv[]) {
 
 					delta[v] += c;
 				}
-				// Node betweenness aggregation part.
+
 				if (w != src) {
 					nodeBetweenness[w] += delta[w];
 				}
@@ -279,7 +274,7 @@ int main(int argc, char* argv[]) {
 	MPI_Barrier(MPI_COMM_WORLD);
 	MPI_Reduce(&nodeBetweenness.front(), &nodeBetweenness_g.front(), n,
 			MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
-	t2 = rtclock();
+	t2 = clock();
 
 	MPI_Barrier(MPI_COMM_WORLD);
 	if (world_rank == 0) {
@@ -288,7 +283,7 @@ int main(int argc, char* argv[]) {
 		time_print(n, e, t);
 
 		betweenness_centrality_print(n, nodeBetweenness_g);
-		//
+
 		cout << "\n";
 		cout << "Time Taken : " << t;
 		cout << "\n";
