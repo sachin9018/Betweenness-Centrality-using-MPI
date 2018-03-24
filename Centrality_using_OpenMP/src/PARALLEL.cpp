@@ -94,6 +94,7 @@ vector<float> parallel_centrality(vector<vector<long> > vertex_list,
 	long L = 0;
 	long vertex = 0;
 	vector<PTriple> adj_list[V];
+	vector<long> delta(V,0);
 	int insert_index = 0;
 //	for (auto &s : vertices) {
 #pragma omp task
@@ -147,26 +148,27 @@ vector<float> parallel_centrality(vector<vector<long> > vertex_list,
 #pragma omp task
 		{
 
-			for (const PTriple & player : adj_list[vertex]) {
-				int i=omp_get_thread_num();
-			if(search_parent(adj_list[vertex].at(insert_index).parent,tr,vertex_list,i,no_of_processes_per_processor) {
-						delta[v] += (sigma[v]/sigma[k])(1+delta[k]))
+						for(auto &de: adj_list[vertex]){
 
-					}
-					tr++;
-//					}
+
+
+//								if(search_parent(vertex,tr,vertex_list,i,no_of_processes_per_processor)){
+//									delta[v] += (sigma[v]/sigma[k])(1+delta[k]);
+//								}
+								tr++;
+							}
 					L--;
 				}
 #pragma omp taskwait
 			}
 
 			for (auto &v : vertices) {
-				CB[*v] = CB[*v] + delta[*v];
+				CB[v] = CB[v] + delta[v];
 			}
-
+			return CB;
 		}
-		return CB;
-	}
+
+
 
 	void split(string s, vector<long> adj[], long V,
 			vector<long> vertices) {

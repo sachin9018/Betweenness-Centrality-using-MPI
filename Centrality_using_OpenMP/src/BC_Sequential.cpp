@@ -84,7 +84,7 @@ void calculate_centrality(int V) { //	cout << "went in calculate centrality";
 	int vertex_count=1;
 	for (auto source_vertex:set_vertices_all) {
 		vertex_count++;
-		if(vertex_count%1000==0) cout<<source_vertex<<endl;
+//		if(vertex_count%1000==0) cout<<source_vertex<<endl;
 		//		Begin of Initialization
 //		cout << "Vertex : " << source_vertex << endl;
 
@@ -198,9 +198,9 @@ void read_file(string path, long V) {
 				continue;
 			bool var  = split(line, V);
 			read_count++;
-			if(read_count%100000==0) cout<<read_count<<" read . ";
+//			if(read_count%100000==0) cout<<read_count<<" read . ";
 			if(!var) count++;
-			if(count==20) myfile.close();
+//			if(count==20) myfile.close();
 
 
 		}

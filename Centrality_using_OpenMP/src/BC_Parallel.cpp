@@ -155,70 +155,33 @@ void read_file(long n, adjacency_list &adjList, char* input) {
 
 			}
 
-			if (src < n && dest < n){
+			if (src < n && dest < n) {
 				adjList[src].push_back(neig(dest, 1));
 //				cout << src << " : " << dest<<endl;
-			}
-			else {
+			} else {
 				count++;
 //			if (read_count % 100000 == 0)
 //				cout << read_count << " read . ";
 
-				if (count == 20)
-					myfile.close();
+//				if (count == 20)
+//					myfile.close();
 			}
 		}
 		myfile.close();
 	} else
 		cout << "Unable to open File_100 file" << endl;
 }
-void readGraph(int n, int &e, adjacency_list &adjList, char* input) {
 
-//	e = 0;
 
-	char * line = NULL;
-	size_t len = 0;
-	FILE * fp = fopen(input, "r");
-	adjList.reserve(100000);
-
-	int start, end, weight, count = 0;
-
-	while (getline(&line, &len, fp) != -1) {
-//		e += 1;
-
-		start = atoi(strtok(line, " "));
-		end = atoi(strtok(NULL, " "));
-//		cout << start << " : " << end << endl;
-
-		if (start < n && end < e) {
-
-			set_vertices_all.insert(start);
-			set_vertices_all.insert(end);
-			adjList[start].push_back(neig(end, 1));
-		} else {
-			if (start > n)
-				count++;
-
-		}
-		if (count >= 20)
-			fclose(fp);
-//        adjList[end].push_back(neighbor(start, weight));
-	}
-
-	if (line) {
-		free(line);
-	}
-
-}
-
-void betweenness_centrality_print(int n, vector<float> nodeBetweenness, string bc_file) {
+void betweenness_centrality_print(int n, vector<float> nodeBetweenness,
+		string bc_file) {
 
 	ofstream out;
 	out.open(bc_file);
 //	cout << endl << "> Parallel Betweenness Centrality" << endl;
 	for (int i = 0; i < n; i++) {
 		//cout << "Node " << i << ": " << nodeBetweenness[i] / nrml << endl;
-		out << "Vertex " << i << ": " <<nodeBetweenness[i]<<endl;
+		out << "Vertex " << i << ": " << nodeBetweenness[i] << endl;
 //				<< nodeBetweenness[i] / ((n - 1) * (n - 2)) << endl;
 	}
 	out.close();
@@ -232,18 +195,19 @@ int main(int argc, char* argv[]) {
 	int world_rank;
 	MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
 
-	int n = stoi(argv[3]), e = stoi(argv[3]);
+	int n = stoi(argv[3]), e = 100000;
 	adjacency_list adjList;
 
 	vector<float> nodeBetweenness;
 	vector<float> nodeBetweenness_g;
 	vector<float> closeness;
-	cout << endl << "Parallel Betweenness Centrality" << endl<<endl;
+	cout << endl << "Parallel Betweenness Centrality" << endl << endl;
 //	cout << "Before going into read file";
-	cout<<"Reading of file started"<<endl;
-	read_file(n,adjList, argv[1]);
-	cout<<"reading the file finished"<<endl;
-//	readGraph(n, e, adjList, argv[1]);
+	cout << "Reading of file started" << endl;
+	read_file(n, adjList, argv[1]);
+
+	cout << "reading the file finished" << endl;
+
 
 	nodeBetweenness.resize(n, 0);
 	nodeBetweenness_g.resize(n, 0);
@@ -256,7 +220,9 @@ int main(int argc, char* argv[]) {
 	MPI_Barrier(MPI_COMM_WORLD);
 	typedef std::chrono::high_resolution_clock Clock;
 	typedef std::chrono::milliseconds milliseconds;
-	cout<<"Calculation of Betweenness Centrality Started"<<endl;
+	cout << "Calculation of Betweenness Centrality Started" << endl;
+	clock_t t1, t2;
+	t1 = clock();
 	Clock::time_point t0 = Clock::now();
 
 	int begin_vertex = n / world_size * world_rank;
@@ -305,12 +271,15 @@ int main(int argc, char* argv[]) {
 	MPI_Reduce(&nodeBetweenness.front(), &nodeBetweenness_g.front(), n,
 	MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
 	Clock::time_point t3 = Clock::now();
-		milliseconds ms = std::chrono::duration_cast<milliseconds>(t3 - t0);
-		cout<<"Calculation of Betweenness Centrality ended"<<endl;
+	t2 = clock();
+
+	cout << "Calculation of Betweenness Centrality ended" << endl;
 
 	MPI_Barrier(MPI_COMM_WORLD);
 	if (world_rank == 0) {
-//		double t = double((t2 - t1)*100) / CLOCKS_PER_SEC;
+		milliseconds ms = std::chrono::duration_cast<milliseconds>(t3 - t0);
+		double t = double((t2 - t1) * 100) / CLOCKS_PER_SEC;
+		cout << "t : " << t << endl;
 
 		time_print(n, e, ms.count());
 
